@@ -362,7 +362,7 @@ int main (void) {
 
         /* ####### Joystick and OLED  ###### */
         /* # */
-        oled_putString(0, 0, "hello", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+        oled_putString(0, 0, "hi", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 //        state = joystick_read();
 //        if (state != 0)
 //            drawOled(state);

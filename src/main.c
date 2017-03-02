@@ -6,7 +6,9 @@
  *
  ******************************************************************************/
 
+#include "LPC17xx.h"
 #include "interface_helper.h"
+#include "timer_helper.h"
 #include "lpc17xx_timer.h"
 
 #include "led_helper.h"
@@ -21,9 +23,9 @@ int main(void) {
     init_i2c();
     init_ssp();
     init_GPIO();
+    setup_timer_interrupt();
 
     while(1) {
-        Timer0_Wait(1);
     }
 }
 

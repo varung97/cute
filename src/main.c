@@ -6,23 +6,23 @@
  *
  ******************************************************************************/
 
-#include <interface_helper.h>
+#include "interface_helper.h"
 #include "lpc17xx_timer.h"
 
+#include "led_helper.h"
 #include "joystick.h"
-#include "pca9532.h"
 #include "acc.h"
 #include "oled.h"
-#include "rgb.h"
+#include "rgb_helper.h"
 #include "led7seg.h"
 
 
-int main (void) {
+int main(void) {
     init_i2c();
     init_ssp();
     init_GPIO();
 
-    while (1) {
+    while(1) {
         Timer0_Wait(1);
     }
 }

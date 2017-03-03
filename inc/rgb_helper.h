@@ -1,4 +1,5 @@
 #include "stdint.h"
+#include "rgb.h"
 
 void init_rgb();
 void set_rgb(uint8_t ledMask);

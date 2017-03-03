@@ -6,10 +6,11 @@
  *
  ******************************************************************************/
 
+#include "stdio.h"
+#include "stdint.h"
 #include "LPC17xx.h"
 #include "interface_helper.h"
 #include "timer_helper.h"
-#include "lpc17xx_timer.h"
 
 #include "led_helper.h"
 #include "joystick.h"
@@ -23,9 +24,20 @@ int main(void) {
     init_i2c();
     init_ssp();
     init_GPIO();
-    setup_timer_interrupt();
+    setup_systick_interrupt();
+    setup_timer0_interrupt();
+
+    init_rgb();
+    init_leds();
+
+    uint32_t prev_sec = 0;
 
     while(1) {
+    	if (secTicks - prev_sec == 2) {
+    		prev_sec = secTicks;
+    		enable_timer0_interrupt();
+    		set_rgb(RGB_BLUE);
+    	}
     }
 }
 

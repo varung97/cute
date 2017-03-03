@@ -5,8 +5,7 @@
  *      Author: Varun
  */
 
-#include "led7seg.h"
-#include "stdint.h"
+#include "led7seg_helper.h"
 
 void init_led7seg(void) {
 	led7seg_init();

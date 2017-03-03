@@ -1,4 +1,5 @@
 #include "stdint.h"
+#include "pca9532.h"
 
 void init_leds(void);
 void set_leds(uint16_t ledOnMask, uint16_t ledOffMask);

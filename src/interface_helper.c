@@ -5,11 +5,7 @@
  *      Author: Varun
  */
 
-#include "stdint.h"
-#include "lpc17xx_pinsel.h"
-#include "lpc17xx_gpio.h"
-#include "lpc17xx_i2c.h"
-#include "lpc17xx_ssp.h"
+#include "interface_helper.h"
 
 PINSEL_CFG_Type PinCfg;
 

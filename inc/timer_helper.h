@@ -1,4 +1,9 @@
 #include "stdint.h"
+#include "stdbool.h"
+#include "LPC17xx.h"
+#include "lpc17xx_timer.h"
+#include "rgb_helper.h"
+#include "led7seg_helper.h"
 
 extern void SysTick_Handler(void);
 extern void TIMER0_IRQHandler(void);

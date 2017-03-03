@@ -5,8 +5,7 @@
  *      Author: Varun
  */
 
-#include "stdint.h"
-#include "pca9532.h"
+#include "led_helper.h"
 
 void init_leds() {
 	pca9532_init();

@@ -5,12 +5,7 @@
  *      Author: Varun
  */
 
-#include "stdint.h"
-#include "stdbool.h"
-#include "LPC17xx.h"
-#include "lpc17xx_timer.h"
-#include "rgb_helper.h"
-
+#include "timer_helper.h"
 
 uint8_t led7seg_display_val = 0;
 

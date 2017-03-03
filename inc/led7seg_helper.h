@@ -1,4 +1,5 @@
 #include "stdint.h"
+#include "led7seg.h"
 
 void init_led7seg(void);
 void set_char_led7seg(uint8_t ch);

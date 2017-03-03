@@ -5,8 +5,7 @@
  *      Author: Varun
  */
 
-#include "stdint.h"
-#include "rgb.h"
+#include "rgb_helper.h"
 
 void init_rgb() {
 	rgb_init();

@@ -11,15 +11,16 @@
 #include "lpc17xx_timer.h"
 #include "rgb_helper.h"
 
-volatile uint32_t ms_ticks; // counter for 1ms SysTicks
-volatile uint32_t sec_ticks; // counter for 1s SysTicks
 
-//  SysTick_Handler - just increment SysTick counter
+uint8_t led7seg_display_val = 0;
+
+// Called every second
 extern void SysTick_Handler(void) {
-	ms_ticks++;
-	if (ms_ticks % 1000 == 0) {
-		sec_ticks++;
-	}
+	led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
+	set_number_led7seg(led7seg_display_val);
+
+	set_rgb(RGB_BLUE);
+	enable_timer_interrupt(LPC_TIM0);
 }
 
 extern void TIMER0_IRQHandler(void) {
@@ -31,7 +32,7 @@ extern void TIMER0_IRQHandler(void) {
 
 // Setup SysTick Timer to interrupt at 1 msec intervals
 void setup_systick_interrupt() {
-	if (SysTick_Config(SystemCoreClock / 1000)) {
+	if (SysTick_Config(SystemCoreClock)) {
 		while (1);  // Capture error
 	}
 }
@@ -51,7 +52,7 @@ uint8_t get_interrupt_handler(LPC_TIM_TypeDef* timer) {
 	}
 }
 
-void setup_timer_interrupt(LPC_TIM_TypeDef* timer, uint32_t ms, uint32_t num_cycles_to_interrupt, uint8_t should_reset) {
+void setup_timer_interrupt(LPC_TIM_TypeDef* timer, uint32_t ms, uint32_t num_cycles_to_interrupt, uint8_t should_stop) {
 	TIM_TIMERCFG_Type timer_config;
 	TIM_ConfigStructInit(TIM_TIMER_MODE, &timer_config);
 	timer_config.PrescaleValue = ms * 1000;
@@ -60,8 +61,8 @@ void setup_timer_interrupt(LPC_TIM_TypeDef* timer, uint32_t ms, uint32_t num_cyc
 	TIM_MATCHCFG_Type matchConfig;
 	matchConfig.MatchChannel = 0;
 	matchConfig.IntOnMatch = ENABLE;
-	matchConfig.StopOnMatch = should_reset ? ENABLE : DISABLE;
-	matchConfig.ResetOnMatch = should_reset ? ENABLE : DISABLE;
+	matchConfig.StopOnMatch = should_stop ? ENABLE : DISABLE;
+	matchConfig.ResetOnMatch = ENABLE;
 	matchConfig.ExtMatchOutputType = 0;
 	matchConfig.MatchValue = num_cycles_to_interrupt;
 

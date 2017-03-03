@@ -22,12 +22,9 @@ extern void SysTick_Handler(void) {
 }
 
 extern void TIMER0_IRQHandler(void) {
-    unsigned int isrMask;
+    TIM_ClearIntPending(LPC_TIM0, TIM_MR0_INT);
 
-    isrMask = LPC_TIM0->IR;
-    LPC_TIM0->IR = isrMask;         /* Clear the Interrupt Bit */
-
-    set_rgb(0);
+    clear_all_rgb();
 }
 
 

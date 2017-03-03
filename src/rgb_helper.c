@@ -27,3 +27,7 @@ void only_set_red_rgb() {
 void only_set_green_rgb() {
 	rgb_setLeds(RGB_GREEN);
 }
+
+void clear_all_rgb() {
+	set_rgb(0);
+}

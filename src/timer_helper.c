@@ -6,6 +6,7 @@
  */
 
 #include "stdint.h"
+#include "stdbool.h"
 #include "LPC17xx.h"
 #include "lpc17xx_timer.h"
 #include "rgb_helper.h"
@@ -35,25 +36,40 @@ void setup_systick_interrupt() {
 	}
 }
 
-void setup_timer0_interrupt() {
-	TIM_TIMERCFG_Type timer0;
-	TIM_ConfigStructInit(TIM_TIMER_MODE, &timer0);
-	timer0.PrescaleValue = 100000;
-	TIM_Init(LPC_TIM0, TIM_TIMER_MODE, &timer0);
+uint8_t get_interrupt_handler(LPC_TIM_TypeDef* timer) {
+	if (timer == LPC_TIM0) {
+		return TIMER0_IRQn;
+	}
+	else if (timer == LPC_TIM1) {
+		return TIMER1_IRQn;
+	}
+	else if (timer == LPC_TIM2) {
+		return TIMER2_IRQn;
+	}
+	else {
+		return TIMER3_IRQn;
+	}
+}
+
+void setup_timer_interrupt(LPC_TIM_TypeDef* timer, uint32_t ms, uint32_t num_cycles_to_interrupt, uint8_t should_reset) {
+	TIM_TIMERCFG_Type timer_config;
+	TIM_ConfigStructInit(TIM_TIMER_MODE, &timer_config);
+	timer_config.PrescaleValue = ms * 1000;
+	TIM_Init(timer, TIM_TIMER_MODE, &timer_config);
 
 	TIM_MATCHCFG_Type matchConfig;
 	matchConfig.MatchChannel = 0;
-	matchConfig.IntOnMatch = SET;
-	matchConfig.StopOnMatch = SET;
-	matchConfig.ResetOnMatch = SET;
+	matchConfig.IntOnMatch = ENABLE;
+	matchConfig.StopOnMatch = should_reset ? ENABLE : DISABLE;
+	matchConfig.ResetOnMatch = should_reset ? ENABLE : DISABLE;
 	matchConfig.ExtMatchOutputType = 0;
-	matchConfig.MatchValue = 1;
+	matchConfig.MatchValue = num_cycles_to_interrupt;
 
-	TIM_ConfigMatch(LPC_TIM0, &matchConfig);
+	TIM_ConfigMatch(timer, &matchConfig);
 
-	NVIC_EnableIRQ(TIMER0_IRQn);
+	NVIC_EnableIRQ(get_interrupt_handler(timer));
 }
 
-void enable_timer0_interrupt() {
-	TIM_Cmd(LPC_TIM0, ENABLE);
+void enable_timer_interrupt(LPC_TIM_TypeDef* timer) {
+	TIM_Cmd(timer, ENABLE);
 }

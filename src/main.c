@@ -25,7 +25,7 @@ int main(void) {
     init_ssp();
     init_GPIO();
     setup_systick_interrupt();
-    setup_timer0_interrupt();
+    setup_timer_interrupt(LPC_TIM0, 100, 2, 1);
 
     init_rgb();
     init_leds();
@@ -41,8 +41,8 @@ int main(void) {
 
     		if (sec_ticks - prev_sec == 2) {
     			// 2 seconds have passed
-    			prev_sec = secTicks;
-				enable_timer0_interrupt();
+    			prev_sec = sec_ticks;
+				enable_timer_interrupt(LPC_TIM0);
 				set_rgb(RGB_BLUE);
     		}
     	}

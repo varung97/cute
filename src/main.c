@@ -17,7 +17,7 @@
 #include "acc.h"
 #include "oled.h"
 #include "rgb_helper.h"
-#include "led7seg.h"
+#include "led7seg_helper.h"
 
 
 int main(void) {
@@ -31,12 +31,20 @@ int main(void) {
     init_leds();
 
     uint32_t prev_sec = 0;
+    uint8_t led7seg_display_val = 0;
 
     while(1) {
-    	if (secTicks - prev_sec == 2) {
-    		prev_sec = secTicks;
-    		enable_timer0_interrupt();
-    		set_rgb(RGB_BLUE);
+    	if (sec_ticks != prev_sec) {
+    		// 1 second has passed
+    		led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
+    		set_number_led7seg(led7seg_display_val);
+
+    		if (sec_ticks - prev_sec == 2) {
+    			// 2 seconds have passed
+    			prev_sec = secTicks;
+				enable_timer0_interrupt();
+				set_rgb(RGB_BLUE);
+    		}
     	}
     }
 }

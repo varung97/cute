@@ -1,5 +1,5 @@
-extern volatile uint32_t msTicks;
-extern volatile uint32_t secTicks;
+extern volatile uint32_t ms_ticks;
+extern volatile uint32_t sec_ticks;
 
 extern void SysTick_Handler(void);
 extern void TIMER0_IRQHandler(void);

@@ -10,14 +10,14 @@
 #include "lpc17xx_timer.h"
 #include "rgb_helper.h"
 
-volatile uint32_t msTicks; // counter for 1ms SysTicks
-volatile uint32_t secTicks; // counter for 1s SysTicks
+volatile uint32_t ms_ticks; // counter for 1ms SysTicks
+volatile uint32_t sec_ticks; // counter for 1s SysTicks
 
 //  SysTick_Handler - just increment SysTick counter
 extern void SysTick_Handler(void) {
-	msTicks++;
-	if (msTicks % 1000 == 0) {
-		secTicks++;
+	ms_ticks++;
+	if (ms_ticks % 1000 == 0) {
+		sec_ticks++;
 	}
 }
 

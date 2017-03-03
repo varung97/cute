@@ -11,11 +11,6 @@ uint8_t led7seg_display_val = 0;
 
 // Called every second
 extern void SysTick_Handler(void) {
-	led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
-	set_number_led7seg(led7seg_display_val);
-
-	set_rgb(RGB_BLUE);
-	enable_timer_interrupt(LPC_TIM0);
 }
 
 extern void TIMER0_IRQHandler(void) {
@@ -24,15 +19,25 @@ extern void TIMER0_IRQHandler(void) {
     clear_all_rgb();
 }
 
+extern void TIMER1_IRQHandler(void) {
+    TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
+
+	led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
+	set_number_led7seg(led7seg_display_val);
+
+	set_rgb(RGB_BLUE);
+	enable_timer_interrupt(LPC_TIM0);
+}
+
 
 // Setup SysTick Timer to interrupt at 1 msec intervals
 void setup_systick_interrupt() {
-	if (SysTick_Config(SystemCoreClock)) {
+	if (SysTick_Config(SystemCoreClock / 1000)) {
 		while (1);  // Capture error
 	}
 }
 
-uint8_t get_interrupt_handler(LPC_TIM_TypeDef* timer) {
+IRQn_Type get_interrupt_handler(LPC_TIM_TypeDef* timer) {
 	if (timer == LPC_TIM0) {
 		return TIMER0_IRQn;
 	}

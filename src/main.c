@@ -24,11 +24,17 @@ int main(void) {
     init_i2c();
     init_ssp();
     init_GPIO();
-    setup_systick_interrupt();
-    setup_timer_interrupt(LPC_TIM0, 100,  2, 1);
+
+    setup_timer_interrupt(LPC_TIM0, 1,   100, 1);
+    setup_timer_interrupt(LPC_TIM1, 1,  1000, 0);
 
     init_rgb();
     init_leds();
+    init_led7seg();
+
+    set_number_led7seg(0);
+
+    enable_timer_interrupt(LPC_TIM1);
 
     return 0;
 }

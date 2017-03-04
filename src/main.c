@@ -19,6 +19,7 @@
 #include "oled.h"
 #include "rgb_helper.h"
 #include "led7seg_helper.h"
+#include "speaker_helper.h"
 
 
 int main(void) {
@@ -28,10 +29,12 @@ int main(void) {
 
     setup_timer_interrupt(LPC_TIM0, 1,   100, 1);
     setup_timer_interrupt(LPC_TIM1, 1,  1000, 0);
+    setup_timer_interrupt(LPC_TIM2, 1,     1, 0);
 
     init_rgb();
     init_leds();
     init_led7seg();
+    init_speaker();
 
     set_number_led7seg(0);
 

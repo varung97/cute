@@ -1,4 +1,5 @@
 #include "interface_helper.h"
+#include "timer_helper.h"
 #include "stdint.h"
 
 void enable_gpio_interrupt(uint8_t port_num, uint8_t pin_num);

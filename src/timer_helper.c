@@ -8,6 +8,7 @@
 #include "timer_helper.h"
 
 uint8_t led7seg_display_val = 0;
+extern uint8_t is_speaker_on = 0;
 
 // Called every second
 extern void SysTick_Handler(void) {
@@ -15,6 +16,8 @@ extern void SysTick_Handler(void) {
 
 extern void TIMER0_IRQHandler(void) {
     TIM_ClearIntPending(LPC_TIM0, TIM_MR0_INT);
+
+    clear_all_rgb();
 }
 
 extern void TIMER1_IRQHandler(void) {
@@ -23,8 +26,19 @@ extern void TIMER1_IRQHandler(void) {
 	led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
 	set_number_led7seg(led7seg_display_val);
 
-//	set_rgb(RGB_BLUE);
-//	enable_timer_interrupt(LPC_TIM0);
+	set_rgb(RGB_GREEN);
+	enable_timer_interrupt(LPC_TIM0);
+}
+
+extern void TIMER2_IRQHandler(void) {
+	TIM_ClearIntPending(LPC_TIM2, TIM_MR0_INT);
+
+	if (is_speaker_on) {
+		speaker_off();
+	} else {
+		speaker_on();
+	}
+	is_speaker_on = !is_speaker_on;
 }
 
 
@@ -71,4 +85,8 @@ void setup_timer_interrupt(LPC_TIM_TypeDef* timer, uint32_t ms, uint32_t num_cyc
 
 void enable_timer_interrupt(LPC_TIM_TypeDef* timer) {
 	TIM_Cmd(timer, ENABLE);
+}
+
+void disable_timer_interrupt(LPC_TIM_TypeDef* timer) {
+	TIM_Cmd(timer, DISABLE);
 }

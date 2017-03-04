@@ -7,8 +7,18 @@
 
 #include "interrupt_helper.h"
 
+extern uint8_t is_speaker_buzzing = 0;
+
 extern void EINT0_IRQHandler(void) {
 	clear_eint_interrupt(0);
+
+	if (is_speaker_buzzing) {
+		enable_timer_interrupt(LPC_TIM2);
+	} else {
+		disable_timer_interrupt(LPC_TIM2);
+	}
+
+	is_speaker_buzzing = !is_speaker_buzzing;
 }
 
 void enable_gpio_interrupt(uint8_t port_num, uint8_t pin_num) {
@@ -37,7 +47,7 @@ int did_interrupt_occur(uint8_t port_num, uint8_t pin_num) {
 
 void enable_eint_interrupt(int int_number) {
 	LPC_SC->EXTMODE |= 1 << int_number;
-	LPC_SC->EXTMODE &= ~(1 << int_number);
+	LPC_SC->EXTPOLAR &= ~(1 << int_number);
 
 	switch (int_number) {
 		case 0:

@@ -22,6 +22,10 @@ void set_pin_dir(uint8_t port_num, uint8_t pin_num, int dir) {
 	GPIO_SetDir(port_num, 1 << pin_num, dir);
 }
 
+void set_pin_val(uint8_t port_num, uint8_t pin_num) {
+	GPIO_SetValue(port_num, 1 << pin_num);
+}
+
 void clear_pin_val(uint8_t port_num, uint8_t pin_num) {
 	GPIO_ClearValue(port_num, 1<<pin_num);
 }

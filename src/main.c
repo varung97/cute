@@ -11,6 +11,7 @@
 #include "LPC17xx.h"
 #include "interface_helper.h"
 #include "timer_helper.h"
+#include "interrupt_helper.h"
 
 #include "led_helper.h"
 #include "joystick.h"
@@ -35,6 +36,8 @@ int main(void) {
     set_number_led7seg(0);
 
     enable_timer_interrupt(LPC_TIM1);
+    enable_gpio_interrupt(2, 10);
+    enable_eint_interrupt(3);
 
     return 0;
 }

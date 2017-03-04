@@ -36,8 +36,8 @@ int main(void) {
     set_number_led7seg(0);
 
     enable_timer_interrupt(LPC_TIM1);
-    enable_gpio_interrupt(2, 10);
-    enable_eint_interrupt(3);
+    enable_eint_interrupt(0);
+    enable_eint_interrupt_handler(0);
 
     return 0;
 }

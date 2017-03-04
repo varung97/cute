@@ -15,8 +15,6 @@ extern void SysTick_Handler(void) {
 
 extern void TIMER0_IRQHandler(void) {
     TIM_ClearIntPending(LPC_TIM0, TIM_MR0_INT);
-
-    clear_all_rgb();
 }
 
 extern void TIMER1_IRQHandler(void) {
@@ -25,8 +23,8 @@ extern void TIMER1_IRQHandler(void) {
 	led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
 	set_number_led7seg(led7seg_display_val);
 
-	set_rgb(RGB_BLUE);
-	enable_timer_interrupt(LPC_TIM0);
+//	set_rgb(RGB_BLUE);
+//	enable_timer_interrupt(LPC_TIM0);
 }
 
 

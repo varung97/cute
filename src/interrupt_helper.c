@@ -7,10 +7,8 @@
 
 #include "interrupt_helper.h"
 
-extern void EINT3_IRQHandler(void) {
-	if (did_interrupt_occur(2, 10)) {
-        clear_gpio_interrupt(2, 10);
-	}
+extern void EINT0_IRQHandler(void) {
+	clear_eint_interrupt(0);
 }
 
 void enable_gpio_interrupt(uint8_t port_num, uint8_t pin_num) {
@@ -57,6 +55,10 @@ void enable_eint_interrupt(int int_number) {
 		default:
 			break;
 	}
+}
+
+void clear_eint_interrupt(int int_number) {
+	LPC_SC->EXTINT |= 1 << int_number;
 }
 
 void enable_eint_interrupt_handler(int int_number) {

@@ -17,17 +17,17 @@ extern void SysTick_Handler(void) {
 extern void TIMER0_IRQHandler(void) {
     TIM_ClearIntPending(LPC_TIM0, TIM_MR0_INT);
 
-    clear_all_rgb();
+    rgb_clear_all();
 }
 
 extern void TIMER1_IRQHandler(void) {
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
 
 	led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
-	set_number_led7seg(led7seg_display_val);
+	led7seg_set_number(led7seg_display_val);
 
-	set_rgb(RGB_GREEN);
-	enable_timer_interrupt(LPC_TIM0);
+	rgb_set(RGB_GREEN);
+	timer_interrupt_enable(LPC_TIM0);
 }
 
 extern void TIMER2_IRQHandler(void) {
@@ -43,7 +43,7 @@ extern void TIMER2_IRQHandler(void) {
 
 
 // Setup SysTick Timer to interrupt at 1 msec intervals
-void setup_systick_interrupt() {
+void systick_interrupt_setup() {
 	if (SysTick_Config(SystemCoreClock / 1000)) {
 		while (1);  // Capture error
 	}
@@ -64,7 +64,7 @@ IRQn_Type get_interrupt_handler(LPC_TIM_TypeDef* timer) {
 	}
 }
 
-void setup_timer_interrupt(LPC_TIM_TypeDef* timer, uint32_t ms, uint32_t num_cycles_to_interrupt, uint8_t should_stop) {
+void timer_interrupt_setup(LPC_TIM_TypeDef* timer, uint32_t ms, uint32_t num_cycles_to_interrupt, uint8_t should_stop) {
 	TIM_TIMERCFG_Type timer_config;
 	TIM_ConfigStructInit(TIM_TIMER_MODE, &timer_config);
 	timer_config.PrescaleValue = ms * 1000;
@@ -83,10 +83,10 @@ void setup_timer_interrupt(LPC_TIM_TypeDef* timer, uint32_t ms, uint32_t num_cyc
 	NVIC_EnableIRQ(get_interrupt_handler(timer));
 }
 
-void enable_timer_interrupt(LPC_TIM_TypeDef* timer) {
+void timer_interrupt_enable(LPC_TIM_TypeDef* timer) {
 	TIM_Cmd(timer, ENABLE);
 }
 
-void disable_timer_interrupt(LPC_TIM_TypeDef* timer) {
+void timer_interrupt_disable(LPC_TIM_TypeDef* timer) {
 	TIM_Cmd(timer, DISABLE);
 }

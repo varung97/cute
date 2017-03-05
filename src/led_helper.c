@@ -7,26 +7,26 @@
 
 #include "led_helper.h"
 
-void init_leds() {
+void leds_init() {
 	pca9532_init();
 }
 
-void set_leds(uint16_t ledOnMask, uint16_t ledOffMask) {
+void leds_set(uint16_t ledOnMask, uint16_t ledOffMask) {
 	pca9532_setLeds(ledOnMask, ledOffMask);
 }
 
-void only_turn_on_leds(uint16_t ledOnMask) {
-	set_leds(ledOnMask, 0xffff);
+void leds_only_turn_on(uint16_t ledOnMask) {
+	leds_set(ledOnMask, 0xffff);
 }
 
-void only_turn_off_leds(uint16_t ledOffMask) {
-	set_leds(~ledOffMask, 0xffff);
+void leds_only_turn_off(uint16_t ledOffMask) {
+	leds_set(~ledOffMask, 0xffff);
 }
 
-void also_turn_on_leds(uint16_t ledOnMask) {
-	set_leds(ledOnMask, 0x0000);
+void leds_also_turn_on(uint16_t ledOnMask) {
+	leds_set(ledOnMask, 0x0000);
 }
 
-void also_turn_off_leds(uint16_t ledOffMask) {
-	set_leds(0x0000, ledOffMask);
+void leds_also_turn_off(uint16_t ledOffMask) {
+	leds_set(0x0000, ledOffMask);
 }

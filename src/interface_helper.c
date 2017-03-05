@@ -9,7 +9,7 @@
 
 PINSEL_CFG_Type PinCfg;
 
-void config_pin(uint8_t func_num, uint8_t open_drain, uint8_t pin_mode, uint8_t port_num, uint8_t pin_num) {
+void pin_config(uint8_t func_num, uint8_t open_drain, uint8_t pin_mode, uint8_t port_num, uint8_t pin_num) {
 	PinCfg.Funcnum = func_num;
 	PinCfg.OpenDrain = open_drain;
 	PinCfg.Pinmode = pin_mode;
@@ -18,19 +18,19 @@ void config_pin(uint8_t func_num, uint8_t open_drain, uint8_t pin_mode, uint8_t 
 	PINSEL_ConfigPin(&PinCfg);
 }
 
-void set_pin_dir(uint8_t port_num, uint8_t pin_num, int dir) {
+void pin_set_dir(uint8_t port_num, uint8_t pin_num, int dir) {
 	GPIO_SetDir(port_num, 1 << pin_num, dir);
 }
 
-void set_pin_val(uint8_t port_num, uint8_t pin_num) {
+void pin_set_val(uint8_t port_num, uint8_t pin_num) {
 	GPIO_SetValue(port_num, 1 << pin_num);
 }
 
-void clear_pin_val(uint8_t port_num, uint8_t pin_num) {
+void pin_clear_val(uint8_t port_num, uint8_t pin_num) {
 	GPIO_ClearValue(port_num, 1<<pin_num);
 }
 
-void init_ssp(void) {
+void ssp_init(void) {
 	SSP_CFG_Type SSP_ConfigStruct;
 
 	/*
@@ -40,10 +40,10 @@ void init_ssp(void) {
 	 * P0.9 - MOSI
 	 * P2.2 - SSEL - used as GPIO
 	 */
-	config_pin(2, 0, 0, 0, 7);
-	config_pin(2, 0, 0, 0, 8);
-	config_pin(2, 0, 0, 0, 9);
-	config_pin(0, 0, 0, 2, 2);
+	pin_config(2, 0, 0, 0, 7);
+	pin_config(2, 0, 0, 0, 8);
+	pin_config(2, 0, 0, 0, 9);
+	pin_config(0, 0, 0, 2, 2);
 
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
 
@@ -55,10 +55,10 @@ void init_ssp(void) {
 
 }
 
-void init_i2c(void) {
+void i2c_init(void) {
 	/* Initialize I2C2 pin connect */
-	config_pin(2, 0, 0, 0, 10);
-	config_pin(2, 0, 0, 0, 11);
+	pin_config(2, 0, 0, 0, 10);
+	pin_config(2, 0, 0, 0, 11);
 
 	// Initialize I2C peripheral
 	I2C_Init(LPC_I2C2, 100000);
@@ -67,8 +67,8 @@ void init_i2c(void) {
 	I2C_Cmd(LPC_I2C2, ENABLE);
 }
 
-void init_GPIO(void) {
+void gpio_init(void) {
 	// Initialize button
-	config_pin(0, 0, 0, 1, 31);
+	pin_config(0, 0, 0, 1, 31);
 	GPIO_SetDir(1, 1<<31, 0);
 }

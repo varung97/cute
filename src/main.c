@@ -23,24 +23,24 @@
 
 
 int main(void) {
-    init_i2c();
-    init_ssp();
-    init_GPIO();
+    i2c_init();
+    ssp_init();
+    gpio_init();
 
-    setup_timer_interrupt(LPC_TIM0, 1,   100, 1);
-    setup_timer_interrupt(LPC_TIM1, 1,  1000, 0);
-    setup_timer_interrupt(LPC_TIM2, 1,     1, 0);
+    timer_interrupt_setup(LPC_TIM0, 1,   100, 1);
+    timer_interrupt_setup(LPC_TIM1, 1,  1000, 0);
+    timer_interrupt_setup(LPC_TIM2, 1,     1, 0);
 
-    init_rgb();
-    init_leds();
-    init_led7seg();
-    init_speaker();
+    rgb_init();
+    leds_init();
 
-    set_number_led7seg(0);
+    speaker_init();
 
-    enable_timer_interrupt(LPC_TIM1);
-    enable_eint_interrupt(0);
-    enable_eint_interrupt_handler(0);
+    led7seg_set_number(0);
+
+    timer_interrupt_enable(LPC_TIM1);
+    eint_interrupt_enable(0);
+    eint_interrupt_handler_enable(0);
 
     return 0;
 }

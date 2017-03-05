@@ -7,26 +7,22 @@
 
 #include "rgb_helper.h"
 
-void init_rgb() {
-	rgb_init();
-}
-
-void set_rgb(uint8_t ledMask) {
+void rgb_set(uint8_t ledMask) {
 	rgb_setLeds(ledMask);
 }
 
-void only_set_blue_rgb() {
+void rgb_only_set_blue() {
 	rgb_setLeds(RGB_BLUE);
 }
 
-void only_set_red_rgb() {
+void rgb_only_set_red() {
 	rgb_setLeds(RGB_RED);
 }
 
-void only_set_green_rgb() {
+void rgb_only_set_green() {
 	rgb_setLeds(RGB_GREEN);
 }
 
-void clear_all_rgb() {
-	set_rgb(0);
+void rgb_clear_all() {
+	rgb_set(0);
 }

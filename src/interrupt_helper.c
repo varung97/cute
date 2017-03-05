@@ -10,18 +10,18 @@
 extern uint8_t is_speaker_buzzing = 0;
 
 extern void EINT0_IRQHandler(void) {
-	clear_eint_interrupt(0);
+	eint_interrupt_clear(0);
 
 	if (is_speaker_buzzing) {
-		enable_timer_interrupt(LPC_TIM2);
+		timer_interrupt_enable(LPC_TIM2);
 	} else {
-		disable_timer_interrupt(LPC_TIM2);
+		timer_interrupt_disable(LPC_TIM2);
 	}
 
 	is_speaker_buzzing = !is_speaker_buzzing;
 }
 
-void enable_gpio_interrupt(uint8_t port_num, uint8_t pin_num) {
+void gpio_interrupt_enable(uint8_t port_num, uint8_t pin_num) {
 	if (port_num == 0) {
 		LPC_GPIOINT->IO0IntEnF |= 1 << pin_num;
 	} else {
@@ -29,7 +29,7 @@ void enable_gpio_interrupt(uint8_t port_num, uint8_t pin_num) {
 	}
 }
 
-void clear_gpio_interrupt(uint8_t port_num, uint8_t pin_num) {
+void gpio_interrupt_clear(uint8_t port_num, uint8_t pin_num) {
 	if (port_num == 0) {
 		LPC_GPIOINT->IO0IntClr = 1 << pin_num;
 	} else {
@@ -37,7 +37,7 @@ void clear_gpio_interrupt(uint8_t port_num, uint8_t pin_num) {
 	}
 }
 
-int did_interrupt_occur(uint8_t port_num, uint8_t pin_num) {
+int did_gpio_interrupt_occur(uint8_t port_num, uint8_t pin_num) {
 	if (port_num == 0) {
 		return (LPC_GPIOINT->IO0IntStatF >> pin_num) & 0x1;
 	} else {
@@ -45,33 +45,33 @@ int did_interrupt_occur(uint8_t port_num, uint8_t pin_num) {
 	}
 }
 
-void enable_eint_interrupt(int int_number) {
+void eint_interrupt_enable(int int_number) {
 	LPC_SC->EXTMODE |= 1 << int_number;
 	LPC_SC->EXTPOLAR &= ~(1 << int_number);
 
 	switch (int_number) {
 		case 0:
-			config_pin(1, 0, 0, 2, 10);
+			pin_config(1, 0, 0, 2, 10);
 			break;
 		case 1:
-			config_pin(1, 0, 0, 2, 11);
+			pin_config(1, 0, 0, 2, 11);
 			break;
 		case 2:
-			config_pin(1, 0, 0, 2, 12);
+			pin_config(1, 0, 0, 2, 12);
 			break;
 		case 3:
-			config_pin(1, 0, 0, 2, 13);
+			pin_config(1, 0, 0, 2, 13);
 			break;
 		default:
 			break;
 	}
 }
 
-void clear_eint_interrupt(int int_number) {
+void eint_interrupt_clear(int int_number) {
 	LPC_SC->EXTINT |= 1 << int_number;
 }
 
-void enable_eint_interrupt_handler(int int_number) {
+void eint_interrupt_handler_enable(int int_number) {
 	switch (int_number) {
 		case 0:
 			NVIC_EnableIRQ(EINT0_IRQn);

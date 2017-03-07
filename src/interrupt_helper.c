@@ -7,7 +7,7 @@
 
 #include "interrupt_helper.h"
 
-extern uint8_t is_speaker_buzzing = 0;
+uint8_t is_speaker_buzzing = 0;
 
 extern void EINT0_IRQHandler(void) {
 	eint_interrupt_clear(0);

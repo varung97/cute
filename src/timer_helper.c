@@ -8,16 +8,17 @@
 #include "timer_helper.h"
 
 uint8_t led7seg_display_val = 0;
-extern uint8_t is_speaker_on = 0;
+volatile uint32_t ms_ticks;
 
 // Called every second
 extern void SysTick_Handler(void) {
+	ms_ticks++;
 }
 
 extern void TIMER0_IRQHandler(void) {
     TIM_ClearIntPending(LPC_TIM0, TIM_MR0_INT);
 
-    rgb_clear_all();
+    rgb_also_clear_blue();
 }
 
 extern void TIMER1_IRQHandler(void) {
@@ -26,7 +27,7 @@ extern void TIMER1_IRQHandler(void) {
 	led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
 	led7seg_set_number(led7seg_display_val);
 
-	rgb_set(RGB_GREEN);
+	rgb_also_set_blue();
 	timer_interrupt_enable(LPC_TIM0);
 }
 
@@ -44,6 +45,8 @@ extern void TIMER2_IRQHandler(void) {
 
 // Setup SysTick Timer to interrupt at 1 msec intervals
 void systick_interrupt_setup() {
+	ms_ticks = 0;
+
 	if (SysTick_Config(SystemCoreClock / 1000)) {
 		while (1);  // Capture error
 	}

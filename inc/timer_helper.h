@@ -5,6 +5,8 @@
 #include "speaker_helper.h"
 #include "rgb_helper.h"
 
+extern volatile uint32_t ms_ticks;
+
 extern void SysTick_Handler(void);
 extern void TIMER0_IRQHandler(void);
 extern void TIMER1_IRQHandler(void);

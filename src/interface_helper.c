@@ -30,6 +30,10 @@ void pin_clear_val(uint8_t port_num, uint8_t pin_num) {
 	GPIO_ClearValue(port_num, 1<<pin_num);
 }
 
+int pin_read_val(uint8_t port_num, uint8_t pin_num) {
+	return (GPIO_ReadValue(port_num) >> pin_num) & 0x1;
+}
+
 void ssp_init(void) {
 	SSP_CFG_Type SSP_ConfigStruct;
 

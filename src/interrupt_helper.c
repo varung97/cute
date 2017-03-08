@@ -13,9 +13,9 @@ extern void EINT0_IRQHandler(void) {
 	eint_interrupt_clear(0);
 
 	if (is_speaker_buzzing) {
-		timer_interrupt_enable(LPC_TIM2);
+		timer_interrupt_enable(2);
 	} else {
-		timer_interrupt_disable(LPC_TIM2);
+		timer_interrupt_disable(2);
 	}
 
 	is_speaker_buzzing = !is_speaker_buzzing;

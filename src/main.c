@@ -23,15 +23,30 @@
 #include "led7seg_helper.h"
 #include "speaker_helper.h"
 
+uint8_t led7seg_display_val = 0;
+
+void turn_off_blinking_rgb() {
+	rgb_also_clear_blue();
+}
+
+void do_every_second() {
+	led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
+	led7seg_set_number(led7seg_display_val);
+
+	rgb_also_set_blue();
+	timer_interrupt_enable(0);
+}
 
 int main(void) {
     i2c_init();
     ssp_init();
     gpio_init();
 
-    timer_interrupt_setup(LPC_TIM0, 1,   100, 1);
-    timer_interrupt_setup(LPC_TIM1, 1,  1000, 0);
-    timer_interrupt_setup(LPC_TIM2, 1,     1, 0);
+    timer_interrupt_setup(0, 1);
+    timer_interrupt_setup(1, 1);
+
+    timer_attach_interrupt(0, turn_off_blinking_rgb, 100, 1);
+    timer_attach_interrupt(1, do_every_second, 1000, 0);
 
     rgb_init();
     leds_init();
@@ -42,7 +57,7 @@ int main(void) {
     led7seg_init();
     temp_init(get_temp_function());
 
-    timer_interrupt_enable(LPC_TIM1);
+    timer_interrupt_enable(1);
     eint_interrupt_enable(0);
     eint_interrupt_handler_enable(0);
     systick_interrupt_setup();

@@ -7,19 +7,12 @@
 
 #include "interrupt_helper.h"
 
-uint8_t is_speaker_buzzing = 0;
-
-extern void EINT0_IRQHandler(void) {
-	eint_interrupt_clear(0);
-
-	if (is_speaker_buzzing) {
-		timer_interrupt_enable(2);
-	} else {
-		timer_interrupt_disable(2);
-	}
-
-	is_speaker_buzzing = !is_speaker_buzzing;
-}
+eint_config_t eint_config_table[EINT_MAX] = {
+   { NULL, EINT0_IRQn, 10 },
+   { NULL, EINT1_IRQn, 11 },
+   { NULL, EINT2_IRQn, 12 },
+   { NULL, EINT3_IRQn, 13 },
+};
 
 void gpio_interrupt_enable(uint8_t port_num, uint8_t pin_num) {
 	if (port_num == 0) {
@@ -45,47 +38,61 @@ int did_gpio_interrupt_occur(uint8_t port_num, uint8_t pin_num) {
 	}
 }
 
-void eint_interrupt_enable(int int_number) {
+void eint_attach_interrupt(uint8_t int_number, eint_func_ptr func_ptr) {
+	if (int_number >= EINT_MAX) return;
+
+	eint_config_table[int_number].eint_func = func_ptr;
+}
+
+void eint_interrupt_enable(uint8_t int_number) {
+	if (int_number >= EINT_MAX) return;
+
 	LPC_SC->EXTMODE |= 1 << int_number;
 	LPC_SC->EXTPOLAR &= ~(1 << int_number);
 
-	switch (int_number) {
-		case 0:
-			pin_config(1, 0, 0, 2, 10);
-			break;
-		case 1:
-			pin_config(1, 0, 0, 2, 11);
-			break;
-		case 2:
-			pin_config(1, 0, 0, 2, 12);
-			break;
-		case 3:
-			pin_config(1, 0, 0, 2, 13);
-			break;
-		default:
-			break;
-	}
+	pin_config(1, 0, 0, 2, eint_config_table[int_number].pin_num);
 }
 
-void eint_interrupt_clear(int int_number) {
+void eint_interrupt_clear(uint8_t int_number) {
+	if (int_number >= EINT_MAX) return;
+
 	LPC_SC->EXTINT |= 1 << int_number;
 }
 
-void eint_interrupt_handler_enable(int int_number) {
-	switch (int_number) {
-		case 0:
-			NVIC_EnableIRQ(EINT0_IRQn);
-			break;
-		case 1:
-			NVIC_EnableIRQ(EINT1_IRQn);
-			break;
-		case 2:
-			NVIC_EnableIRQ(EINT2_IRQn);
-			break;
-		case 3:
-			NVIC_EnableIRQ(EINT3_IRQn);
-			break;
-		default:
-			break;
+void eint_interrupt_handler_enable(uint8_t int_number) {
+	if (int_number >= EINT_MAX) return;
+
+	NVIC_EnableIRQ(eint_config_table[int_number].IrqNumber);
+}
+
+void call_eint_func(uint8_t int_number) {
+	if (int_number >= EINT_MAX) return;
+
+	if (eint_config_table[int_number].eint_func != NULL) {
+		eint_config_table[int_number].eint_func();
 	}
+}
+
+void EINT0_IRQHandler(void) {
+	eint_interrupt_clear(EINT0);
+
+	call_eint_func(EINT0);
+}
+
+void EINT1_IRQHandler(void) {
+	eint_interrupt_clear(EINT1);
+
+	call_eint_func(EINT1);
+}
+
+void EINT2_IRQHandler(void) {
+	eint_interrupt_clear(EINT2);
+
+	call_eint_func(EINT2);
+}
+
+void EINT3_IRQHandler(void) {
+	eint_interrupt_clear(EINT3);
+
+	call_eint_func(EINT3);
 }

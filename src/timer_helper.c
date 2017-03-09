@@ -25,31 +25,6 @@ uint32_t get_ms_ticks() {
 	return ms_ticks;
 }
 
-void TIMER0_IRQHandler(void) {
-    TIM_ClearIntPending(timer_config_table[TIMER0].TIMx, TIM_MR0_INT);
-
-    call_timer_func(TIMER0);
-}
-
-void TIMER1_IRQHandler(void) {
-    TIM_ClearIntPending(timer_config_table[TIMER1].TIMx, TIM_MR0_INT);
-
-    call_timer_func(TIMER1);
-}
-
-void TIMER2_IRQHandler(void) {
-	TIM_ClearIntPending(timer_config_table[TIMER2].TIMx, TIM_MR0_INT);
-
-	call_timer_func(TIMER2);
-}
-
-void TIMER3_IRQHandler(void) {
-	TIM_ClearIntPending(timer_config_table[TIMER3].TIMx, TIM_MR0_INT);
-
-	call_timer_func(TIMER3);
-}
-
-
 // Setup SysTick Timer to interrupt at 1 msec intervals
 void systick_interrupt_setup() {
 	ms_ticks = 0;
@@ -107,4 +82,28 @@ void call_timer_func(uint8_t timer_num) {
 	if (timer_config_table[timer_num].timer_func != NULL) {
 		timer_config_table[timer_num].timer_func();
 	}
+}
+
+void TIMER0_IRQHandler(void) {
+    TIM_ClearIntPending(timer_config_table[TIMER0].TIMx, TIM_MR0_INT);
+
+    call_timer_func(TIMER0);
+}
+
+void TIMER1_IRQHandler(void) {
+    TIM_ClearIntPending(timer_config_table[TIMER1].TIMx, TIM_MR0_INT);
+
+    call_timer_func(TIMER1);
+}
+
+void TIMER2_IRQHandler(void) {
+	TIM_ClearIntPending(timer_config_table[TIMER2].TIMx, TIM_MR0_INT);
+
+	call_timer_func(TIMER2);
+}
+
+void TIMER3_IRQHandler(void) {
+	TIM_ClearIntPending(timer_config_table[TIMER3].TIMx, TIM_MR0_INT);
+
+	call_timer_func(TIMER3);
 }

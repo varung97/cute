@@ -1,6 +1,7 @@
 #ifndef INTERRUPT_HELPER_H
 #define INTERRUPT_HELPER_H
 
+#include "stdint.h"
 #include "interface_helper.h"
 #include "timer_helper.h"
 

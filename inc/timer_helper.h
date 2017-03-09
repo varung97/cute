@@ -1,6 +1,7 @@
 #ifndef TIMER_HELPER_H
 #define TIMER_HELPER_H
 
+#include "stdint.h"
 #include "LPC17xx.h"
 #include "lpc17xx_timer.h"
 

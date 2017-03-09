@@ -13,8 +13,6 @@
 #define TIMER2 2
 #define TIMER3 3
 
-extern volatile uint32_t ms_ticks;
-
 typedef void (*timer_func_ptr)(void);
 
 typedef struct {
@@ -29,5 +27,6 @@ void timer_attach_interrupt(uint8_t timer_num, timer_func_ptr timer_func, uint32
 void timer_interrupt_enable(uint8_t timer_num);
 void timer_interrupt_disable(uint8_t timer);
 void call_timer_func(uint8_t timer_num);
+uint32_t get_ms_ticks(void);
 
 #endif

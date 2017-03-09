@@ -55,7 +55,7 @@ int main(void) {
 //    speaker_init();
     oled_init();
     led7seg_init();
-    temp_init(get_temp_function());
+    temp_init(&get_ms_ticks);
 
     timer_interrupt_enable(1);
     eint_interrupt_enable(0);

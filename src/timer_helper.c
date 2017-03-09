@@ -7,7 +7,7 @@
 
 #include "timer_helper.h"
 
-volatile uint32_t ms_ticks;
+uint32_t ms_ticks;
 
 timer_config_t timer_config_table[TIMER_MAX] = {
    { NULL, LPC_TIM0, TIMER0_IRQn, },
@@ -19,6 +19,10 @@ timer_config_t timer_config_table[TIMER_MAX] = {
 // Called every millisecond
 void SysTick_Handler(void) {
 	ms_ticks++;
+}
+
+uint32_t get_ms_ticks() {
+	return ms_ticks;
 }
 
 void TIMER0_IRQHandler(void) {

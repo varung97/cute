@@ -1,3 +1,6 @@
+#ifndef INTERRUPT_HELPER_H
+#define INTERRUPT_HELPER_H
+
 #include "interface_helper.h"
 #include "timer_helper.h"
 
@@ -22,3 +25,5 @@ void eint_attach_interrupt(uint8_t int_number, eint_func_ptr func_ptr);
 void eint_interrupt_enable(uint8_t int_number);
 void eint_interrupt_clear(uint8_t int_number);
 void eint_interrupt_handler_enable(uint8_t int_number);
+
+#endif

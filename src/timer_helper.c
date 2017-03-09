@@ -6,8 +6,10 @@
  */
 
 #include "timer_helper.h"
+#include "led_helper.h"
 
 uint32_t ms_ticks;
+char str_bleh[18];
 
 timer_config_t timer_config_table[TIMER_MAX] = {
    { NULL, LPC_TIM0, TIMER0_IRQn, },
@@ -16,7 +18,7 @@ timer_config_t timer_config_table[TIMER_MAX] = {
    { NULL, LPC_TIM3, TIMER3_IRQn, },
 };
 
-// Called every millisecond
+// Called every milliseconds
 void SysTick_Handler(void) {
 	ms_ticks++;
 }

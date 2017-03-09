@@ -8,6 +8,8 @@
 #ifndef APPLICATION_LOGIC_H_
 #define APPLICATION_LOGIC_H_
 
+#include "stdio.h"
+#include "stdint.h"
 #include "interface_helper.h"
 #include "timer_helper.h"
 #include "interrupt_helper.h"
@@ -22,9 +24,11 @@
 #include "led7seg_helper.h"
 #include "speaker_helper.h"
 
+typedef enum {PASSIVE, MONITOR} mode_type;
+
 void turn_off_blinking_rgb();
 void do_every_second();
-void toggle_speaker_buzzing();
+void toggle_mode();
 
 
 #endif /* APPLICATION_LOGIC_H_ */

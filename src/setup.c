@@ -14,36 +14,37 @@ void init_interfaces() {
 }
 
 void init_external_peripherals() {
-	rgb_init();
-	leds_init();
 	acc_init();
 	light_init();
-	speaker_init();
+	temp_init(&get_ms_ticks);
+	rgb_init();
 	oled_init();
 	led7seg_init();
-	temp_init(&get_ms_ticks);
 
-	light_enable();
-	led7seg_set_number(0);
+	acc_setMode(ACC_MODE_STANDBY);
+	acc_setRange(ACC_RANGE_4G);
+	led7seg_set_raw(0xFF);
 	oled_clearScreen(OLED_COLOR_BLACK);
 }
 
 void init_interrupts() {
 	timer_interrupt_setup(TIMER0, 1);
 	timer_interrupt_setup(TIMER1, 1);
-	timer_interrupt_setup(TIMER2, 1);
 	systick_interrupt_setup();
 }
 
 void attach_interrupts() {
 	timer_attach_interrupt(TIMER0, turn_off_blinking_rgb, 100, 1);
 	timer_attach_interrupt(TIMER1, do_every_second, 1000, 0);
-	timer_attach_interrupt(TIMER2, speaker_toggle, 1, 0);
-	eint_attach_interrupt(EINT0, toggle_speaker_buzzing);
+	eint_attach_interrupt(EINT0, toggle_mode);
+
+	NVIC_SetPriority(TIMER0_IRQn, 31);
+	NVIC_SetPriority(TIMER1_IRQn, 31);
+	NVIC_SetPriority(SysTick_IRQn, 31);
+	NVIC_SetPriority(EINT0_IRQn, 31);
 }
 
 void enable_interrupts() {
-	timer_interrupt_enable(TIMER1);
 	eint_interrupt_enable(EINT0);
 	eint_interrupt_handler_enable(EINT0);
 }

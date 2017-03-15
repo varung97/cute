@@ -85,9 +85,9 @@ void do_every_second() {
 
 		acc_read(&x, &y, &z);
 
-		NVIC_SetPriority(SysTick_IRQn, 0);
+		systick_interrupt_enable();
 		temp_val = temp_read();
-		NVIC_SetPriority(SysTick_IRQn, 31);
+		systick_interrupt_disable();
 		light_val = light_read();
 
 		display_values();

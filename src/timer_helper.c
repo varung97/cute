@@ -8,7 +8,7 @@
 #include "timer_helper.h"
 #include "led_helper.h"
 
-uint32_t ms_ticks;
+volatile uint32_t ms_ticks;
 char str_bleh[18];
 
 timer_config_t timer_config_table[TIMER_MAX] = {
@@ -28,12 +28,17 @@ uint32_t get_ms_ticks() {
 }
 
 // Setup SysTick Timer to interrupt at 1 msec intervals
-void systick_interrupt_setup() {
+void systick_interrupt_enable() {
 	ms_ticks = 0;
 
 	if (SysTick_Config(SystemCoreClock / 1000)) {
 		while (1);  // Capture error
 	}
+	NVIC_SetPriority(SysTick_IRQn, 0);
+}
+
+void systick_interrupt_disable() {
+	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk;
 }
 
 void timer_interrupt_setup(uint8_t timer_num, uint32_t ms) {

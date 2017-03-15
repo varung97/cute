@@ -30,7 +30,6 @@ void init_external_peripherals() {
 void init_interrupts() {
 	timer_interrupt_setup(TIMER0, 1);
 	timer_interrupt_setup(TIMER1, 1);
-	systick_interrupt_setup();
 }
 
 void attach_interrupts() {

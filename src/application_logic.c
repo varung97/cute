@@ -7,6 +7,9 @@
 
 #include "application_logic.h"
 
+#define LIGHT_LOW_WARNING 50
+#define TEMP_HIGH_WARNING 450
+
 uint8_t led7seg_display_val;
 
 mode_type current_mode = PASSIVE;
@@ -76,8 +79,6 @@ void do_every_second() {
 	led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
 	led7seg_set_number(led7seg_display_val);
 
-//	rgb_also_set_red();
-//	timer_interrupt_enable(TIMER0);
 	if (led7seg_display_val == 5 ||
 		led7seg_display_val == 10 ||
 		led7seg_display_val == 15) {

@@ -37,10 +37,9 @@ void attach_interrupts() {
 	timer_attach_interrupt(TIMER1, do_every_second, 1000, 0);
 	eint_attach_interrupt(EINT0, toggle_mode);
 
-	NVIC_SetPriority(TIMER0_IRQn, 31);
-	NVIC_SetPriority(TIMER1_IRQn, 31);
-	NVIC_SetPriority(SysTick_IRQn, 31);
-	NVIC_SetPriority(EINT0_IRQn, 31);
+	NVIC_SetPriority(TIMER0_IRQn, 1);
+	NVIC_SetPriority(TIMER1_IRQn, 1);
+	NVIC_SetPriority(EINT0_IRQn, 2);
 }
 
 void enable_interrupts() {

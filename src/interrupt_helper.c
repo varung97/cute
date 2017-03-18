@@ -44,13 +44,14 @@ void eint_attach_interrupt(uint8_t int_number, eint_func_ptr func_ptr) {
 	eint_config_table[int_number].eint_func = func_ptr;
 }
 
-void eint_interrupt_enable(uint8_t int_number) {
+void eint_interrupt_enable(uint8_t int_number, uint8_t extmode, uint8_t extpolar) {
 	if (int_number >= EINT_MAX) return;
 
-	LPC_SC->EXTMODE |= 1 << int_number;
-	LPC_SC->EXTPOLAR &= ~(1 << int_number);
+	LPC_SC->EXTMODE = (LPC_SC->EXTMODE & ~(1 << int_number)) | (extmode << int_number);
+	LPC_SC->EXTPOLAR = (LPC_SC->EXTPOLAR & ~(1 << int_number)) | (extpolar << int_number);
 
-	pin_config(1, 0, 0, 2, eint_config_table[int_number].pin_num);
+	if(int_number != 3)
+		pin_config(1, 0, 0, 2, eint_config_table[int_number].pin_num);
 }
 
 void eint_interrupt_clear(uint8_t int_number) {

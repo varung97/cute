@@ -7,7 +7,7 @@
 
 #include "application_logic.h"
 
-#define LIGHT_LOW_WARNING 50
+#define LIGHT_LOW_WARNING 150
 #define TEMP_HIGH_WARNING 450
 
 uint8_t led7seg_display_val;
@@ -43,14 +43,14 @@ void enable_passive_mode() {
 
 void toggle_mode() {
 	switch (current_mode) {
-		case PASSIVE:
-			enable_monitor_mode();
-			break;
-		case MONITOR:
-			enable_passive_mode();
-			break;
-		default:
-			break;
+	case PASSIVE:
+		enable_monitor_mode();
+		break;
+	case MONITOR:
+		enable_passive_mode();
+		break;
+	default:
+		break;
 	}
 }
 
@@ -80,8 +80,8 @@ void do_every_second() {
 	led7seg_set_number(led7seg_display_val);
 
 	if (led7seg_display_val == 5 ||
-		led7seg_display_val == 10 ||
-		led7seg_display_val == 15) {
+			led7seg_display_val == 10 ||
+			led7seg_display_val == 15) {
 
 		acc_read(&x, &y, &z);
 
@@ -96,4 +96,21 @@ void do_every_second() {
 	if (led7seg_display_val == 15) {
 		// Send values through UART
 	}
+}
+
+void eint3_isr(void) {
+	if(did_gpio_interrupt_occur(2, 5)) {
+		gpio_interrupt_clear(2, 5);
+		leds_only_turn_on(0x1);
+	}
+}
+
+void read_light_sensor() {
+	pin_config(0, 1, 3, 2, 5);
+	pin_set_dir(2, 5, 1);
+	light_setLoThreshold(LIGHT_LOW_WARNING);
+	light_setIrqInCycles(1);
+	light_clearIrqStatus();
+//	LPC_GPIOINT->IO2IntEnF |= 1 << 5;
+	eint_attach_interrupt(3, eint3_isr);
 }

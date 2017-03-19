@@ -94,7 +94,7 @@ void EINT2_IRQHandler(void) {
 }
 
 void EINT3_IRQHandler(void) {
-	eint_interrupt_clear(EINT3);
+//	eint_interrupt_clear(EINT3);
 
 	call_eint_func(EINT3);
 }

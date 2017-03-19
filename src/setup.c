@@ -42,7 +42,7 @@ void attach_interrupts() {
 	timer_attach_interrupt(TIMER0, turn_off_blinking_rgb, 100, 1);
 	timer_attach_interrupt(TIMER1, do_every_second, 1000, 0);
 	eint_attach_interrupt(EINT0, toggle_mode);
-//	read_light_sensor();
+	read_light_sensor();
 
 	NVIC_SetPriority(TIMER0_IRQn, 31);
 	NVIC_SetPriority(TIMER1_IRQn, 31);

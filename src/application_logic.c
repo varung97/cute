@@ -7,7 +7,7 @@
 
 #include "application_logic.h"
 
-#define LIGHT_LOW_WARNING 150
+#define LIGHT_LOW_WARNING 10
 #define TEMP_HIGH_WARNING 450
 
 uint8_t led7seg_display_val;
@@ -20,6 +20,7 @@ uint32_t light_val;
 char str_val[12];
 
 void enable_monitor_mode() {
+//	leds_also_turn_off(0x1);
 	current_mode = MONITOR;
 
 	led7seg_display_val = 0;
@@ -29,6 +30,8 @@ void enable_monitor_mode() {
 	light_enable();
 	temp_init(&get_ms_ticks);
 	oled_putString(0, 0, (uint8_t *) "MONITOR", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+	//	NVIC_SetPendingIRQ(EINT3_IRQn);
+//	GPIO_SetValue(2, 0x20);
 }
 
 void enable_passive_mode() {
@@ -99,7 +102,7 @@ void do_every_second() {
 }
 
 void eint3_isr(void) {
-	leds_also_turn_on(0x2);
+	leds_also_turn_on(0x8);
 	if(did_gpio_interrupt_occur(2, 5)) {
 		gpio_interrupt_clear(2, 5);
 //		eint_interrupt_clear(3);
@@ -109,11 +112,16 @@ void eint3_isr(void) {
 }
 
 void read_light_sensor() {
-	pin_config(0, 1, 3, 2, 5);
+	pin_config(0, 0, 0, 2, 5);
 	pin_set_dir(2, 5, 0);
+	light_setMode(LIGHT_MODE_D1);
+	light_setRange(LIGHT_RANGE_1000);
 	light_setLoThreshold(LIGHT_LOW_WARNING);
-	light_setIrqInCycles(1);
+	light_setHiThreshold(0xFF);
+	light_setIrqInCycles(LIGHT_CYCLE_16);
 	light_clearIrqStatus();
+//	gpio_interrupt_clear(2, 5);
 	gpio_interrupt_enable(2, 5);
 	eint_attach_interrupt(3, eint3_isr);
+	NVIC_ClearPendingIRQ(EINT3_IRQn);
 }

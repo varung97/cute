@@ -99,18 +99,21 @@ void do_every_second() {
 }
 
 void eint3_isr(void) {
+	leds_also_turn_on(0x2);
 	if(did_gpio_interrupt_occur(2, 5)) {
 		gpio_interrupt_clear(2, 5);
+//		eint_interrupt_clear(3);
 		leds_only_turn_on(0x1);
 	}
+//	leds_also_turn_off(0x1);
 }
 
 void read_light_sensor() {
 	pin_config(0, 1, 3, 2, 5);
-	pin_set_dir(2, 5, 1);
+	pin_set_dir(2, 5, 0);
 	light_setLoThreshold(LIGHT_LOW_WARNING);
 	light_setIrqInCycles(1);
 	light_clearIrqStatus();
-//	LPC_GPIOINT->IO2IntEnF |= 1 << 5;
+	gpio_interrupt_enable(2, 5);
 	eint_attach_interrupt(3, eint3_isr);
 }

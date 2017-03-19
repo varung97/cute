@@ -26,7 +26,7 @@ void gpio_interrupt_clear(uint8_t port_num, uint8_t pin_num) {
 	if (port_num == 0) {
 		LPC_GPIOINT->IO0IntClr = 1 << pin_num;
 	} else {
-		LPC_GPIOINT->IO2IntEnF |= 1 << pin_num;
+		LPC_GPIOINT->IO2IntClr = 1 << pin_num;
 	}
 }
 
@@ -50,8 +50,9 @@ void eint_interrupt_enable(uint8_t int_number, uint8_t extmode, uint8_t extpolar
 	LPC_SC->EXTMODE = (LPC_SC->EXTMODE & ~(1 << int_number)) | (extmode << int_number);
 	LPC_SC->EXTPOLAR = (LPC_SC->EXTPOLAR & ~(1 << int_number)) | (extpolar << int_number);
 
-	if(int_number != 3)
+	if(int_number != 3) {
 		pin_config(1, 0, 0, 2, eint_config_table[int_number].pin_num);
+	}
 }
 
 void eint_interrupt_clear(uint8_t int_number) {

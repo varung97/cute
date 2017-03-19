@@ -8,11 +8,11 @@
 #include "led7seg_helper.h"
 
 void led7seg_set_char(uint8_t ch) {
-	led7seg_setChar(ch, 0);
+	led7seg_setChar(ch, 1);
 }
 
 void led7seg_set_raw(uint8_t raw_val) {
-	led7seg_setChar(raw_val, 1);
+	led7seg_setChar(raw_val, 0);
 }
 
 void led7seg_set_number(uint8_t num) {

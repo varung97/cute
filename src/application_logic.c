@@ -7,7 +7,7 @@
 
 #include "application_logic.h"
 
-#define LIGHT_LOW_WARNING 10
+#define LIGHT_LOW_WARNING 150
 #define TEMP_HIGH_WARNING 450
 
 uint8_t led7seg_display_val;

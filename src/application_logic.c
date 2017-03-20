@@ -7,7 +7,7 @@
 
 #include "application_logic.h"
 
-#define LIGHT_LOW_WARNING 150
+#define LIGHT_LOW_WARNING 50
 #define TEMP_HIGH_WARNING 450
 
 uint8_t led7seg_display_val;
@@ -20,7 +20,6 @@ uint32_t light_val;
 char str_val[12];
 
 void enable_monitor_mode() {
-//	leds_also_turn_off(0x1);
 	current_mode = MONITOR;
 
 	led7seg_display_val = 0;

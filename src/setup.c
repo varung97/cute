@@ -7,11 +7,6 @@
 
 #include "setup.h"
 
-#define LEVEL_TRIGGERED 0
-#define EDGE_TRIGGERED 1
-#define ACTIVELOW_OR_FALLINGEDGE 0
-#define ACTIVEHIGH_OR_RISINGEDGE 1
-
 void init_interfaces() {
 	i2c_init();
 	ssp_init();

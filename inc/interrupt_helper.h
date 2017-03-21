@@ -11,6 +11,11 @@
 #define EINT2 2
 #define EINT3 3
 
+#define LEVEL_TRIGGERED 0
+#define EDGE_TRIGGERED 1
+#define ACTIVELOW_OR_FALLINGEDGE 0
+#define ACTIVEHIGH_OR_RISINGEDGE 1
+
 typedef void (*eint_func_ptr)(void);
 
 typedef struct {

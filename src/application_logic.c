@@ -122,5 +122,4 @@ void eint3_isr(void) {
 		else
 			leds_also_turn_off(0x1);
 	}
-//	leds_also_turn_off(0x1);
 }

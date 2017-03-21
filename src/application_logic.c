@@ -7,13 +7,14 @@
 
 #include "application_logic.h"
 
-#define LIGHT_LOW_WARNING 50
+#define LIGHT_LOW_WARNING 40
+#define LIGHT_HIGH_THRESHOLD 200
 #define TEMP_HIGH_WARNING 450
 
 uint8_t led7seg_display_val;
 
 mode_type current_mode = PASSIVE;
-
+int led = 0;
 int8_t x, y, z;
 int32_t temp_val;
 uint32_t light_val;
@@ -45,14 +46,14 @@ void enable_passive_mode() {
 
 void toggle_mode() {
 	switch (current_mode) {
-		case PASSIVE:
-			enable_monitor_mode();
-			break;
-		case MONITOR:
-			enable_passive_mode();
-			break;
-		default:
-			break;
+	case PASSIVE:
+		enable_monitor_mode();
+		break;
+	case MONITOR:
+		enable_passive_mode();
+		break;
+	default:
+		break;
 	}
 }
 
@@ -65,7 +66,7 @@ void turn_off_blinking_rgb() {
 }
 
 void display_values() {
-	sprintf(str_val, "Temp: %d", (int) temp_val);
+	sprintf(str_val, "Temp: %.1f", temp_val/10.0);
 	oled_putString(0, 10, (uint8_t *) str_val, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
 	sprintf(str_val, "Light: %d", (int) light_val);
@@ -113,4 +114,32 @@ void loop() {
 			// Send values through UART
 		}
 	}
+}
+
+void eint3_isr(void) {
+	if(did_gpio_interrupt_occur(2, 5)) {
+		gpio_interrupt_clear(2, 5);
+		light_clearIrqStatus();
+		led = !led;
+		if(led)
+			leds_also_turn_on(0x1);
+		else
+			leds_also_turn_off(0x1);
+	}
+//	leds_also_turn_off(0x1);
+}
+
+void read_light_sensor() {
+	pin_config(0, 0, 2, 2, 5);
+	pin_set_dir(2, 5, 0);
+	light_setMode(LIGHT_MODE_D1);
+	light_setRange(LIGHT_RANGE_1000);
+	light_setWidth(LIGHT_WIDTH_16BITS);
+	light_setLoThreshold(LIGHT_LOW_WARNING);
+	light_setHiThreshold(LIGHT_HIGH_THRESHOLD);
+	light_setIrqInCycles(LIGHT_CYCLE_1);
+	light_clearIrqStatus();
+	gpio_interrupt_enable(2, 5);
+	eint_attach_interrupt(3, eint3_isr);
+	NVIC_ClearPendingIRQ(EINT3_IRQn);
 }

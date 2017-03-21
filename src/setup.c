@@ -7,6 +7,11 @@
 
 #include "setup.h"
 
+#define LEVEL_TRIGGERED 0
+#define EDGE_TRIGGERED 1
+#define ACTIVELOW_OR_FALLINGEDGE 0
+#define ACTIVEHIGH_OR_RISINGEDGE 1
+
 void init_interfaces() {
 	i2c_init();
 	ssp_init();
@@ -41,12 +46,16 @@ void attach_interrupts() {
 	NVIC_SetPriority(TIMER0_IRQn, 1);
 	NVIC_SetPriority(TIMER1_IRQn, 1);
 	NVIC_SetPriority(EINT0_IRQn, 2);
+	NVIC_SetPriority(EINT3_IRQn, 1);
 	NVIC_SetPriority(SysTick_IRQn, 0);
+	read_light_sensor();
 }
 
 void enable_interrupts() {
-	eint_interrupt_enable(EINT0);
+	eint_interrupt_enable(EINT0, EDGE_TRIGGERED, ACTIVELOW_OR_FALLINGEDGE);
 	eint_interrupt_handler_enable(EINT0);
+	eint_interrupt_enable(EINT3, LEVEL_TRIGGERED, ACTIVELOW_OR_FALLINGEDGE);
+	eint_interrupt_handler_enable(EINT3);
 }
 
 void setup() {

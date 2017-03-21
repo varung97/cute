@@ -30,6 +30,7 @@ void turn_off_blinking_rgb();
 void do_every_second();
 void toggle_isr();
 void loop();
+void read_light_sensor();
 
 
 #endif /* APPLICATION_LOGIC_H_ */

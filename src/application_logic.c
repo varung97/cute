@@ -16,7 +16,8 @@ int32_t temp_val;
 uint32_t light_val;
 char str_val[12];
 
-volatile int is_new_second = 0, should_toggle_mode = 0;
+volatile int is_new_second = 0, should_toggle_mode = 0, blue_rgb = 0, red_rgb = 0;
+int is_blue_rgb_on = 0, is_red_rgb_on = 0;
 
 void enable_monitor_mode() {
 	current_mode = MONITOR;
@@ -57,8 +58,16 @@ void toggle_isr() {
 	should_toggle_mode = 1;
 }
 
-void turn_off_blinking_rgb() {
-	rgb_also_clear_red();
+void toggle_leds() {
+	if (is_blue_rgb_on) {
+		blue_rgb = !blue_rgb;
+		blue_rgb ? rgb_also_set_blue() : rgb_also_clear_blue();
+	}
+
+	if (is_red_rgb_on) {
+		red_rgb = !red_rgb;
+		red_rgb ? rgb_also_set_red() : rgb_also_clear_red();
+	}
 }
 
 void display_values() {
@@ -114,12 +123,9 @@ void loop() {
 
 void eint3_isr(void) {
 	if(did_gpio_interrupt_occur(2, 5)) {
+		// light interrupt
 		gpio_interrupt_clear(2, 5);
 		light_clearIrqStatus();
-		led = !led;
-		if(led)
-			leds_also_turn_on(0x1);
-		else
-			leds_also_turn_off(0x1);
+		timer_interrupt_enable(0);
 	}
 }

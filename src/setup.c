@@ -34,7 +34,7 @@ void init_interrupts() {
 }
 
 void attach_interrupts() {
-	timer_attach_interrupt(TIMER0, turn_off_blinking_rgb, 100, 1);
+	timer_attach_interrupt(TIMER0, toggle_leds, 100, 1);
 	timer_attach_interrupt(TIMER1, do_every_second, 1000, 0);
 	eint_attach_interrupt(EINT0, toggle_isr);
 	eint_attach_interrupt(EINT3, eint3_isr);

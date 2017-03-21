@@ -16,29 +16,34 @@ int32_t temp_val;
 uint32_t light_val;
 char str_val[12];
 
-volatile int is_new_second = 0, should_toggle_mode = 0, blue_rgb = 0, red_rgb = 0;
-int is_blue_rgb_on = 0, is_red_rgb_on = 0;
+volatile int is_new_second = 0, should_toggle_mode = 0, blue_rgb = 0, red_rgb = 0, is_blue_rgb_on = 0, is_red_rgb_on = 0;
 
 void enable_monitor_mode() {
 	current_mode = MONITOR;
 
-	led7seg_display_val = 0;
+	led7seg_display_val = is_blue_rgb_on = is_red_rgb_on = 0;
 	led7seg_set_number(led7seg_display_val);
 	timer_interrupt_enable(TIMER1);
 	acc_setMode(ACC_MODE_MEASURE);
 	light_enable();
 	temp_init(&get_ms_ticks);
 	oled_putString(0, 0, (uint8_t *) "MONITOR", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+
+	eint_interrupt_handler_enable(EINT3);
 }
 
 void enable_passive_mode() {
 	current_mode = PASSIVE;
 
+	is_blue_rgb_on = is_red_rgb_on = 0;
 	led7seg_set_raw(0xFF);
+	timer_interrupt_disable(TIMER0);
 	timer_interrupt_disable(TIMER1);
 	acc_setMode(ACC_MODE_STANDBY);
 	light_shutdown();
 	oled_clearScreen(OLED_COLOR_BLACK);
+
+	eint_interrupt_handler_disable(EINT3);
 }
 
 void toggle_mode() {
@@ -126,6 +131,9 @@ void eint3_isr(void) {
 		// light interrupt
 		gpio_interrupt_clear(2, 5);
 		light_clearIrqStatus();
-		timer_interrupt_enable(0);
+		if (!is_blue_rgb_on) {
+			is_blue_rgb_on = 1;
+			timer_interrupt_enable(TIMER0);
+		}
 	}
 }

@@ -28,7 +28,8 @@ typedef enum {PASSIVE, MONITOR} mode_type;
 
 void turn_off_blinking_rgb();
 void do_every_second();
-void toggle_mode();
+void toggle_isr();
+void loop();
 
 
 #endif /* APPLICATION_LOGIC_H_ */

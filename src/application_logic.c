@@ -19,6 +19,8 @@ int32_t temp_val;
 uint32_t light_val;
 char str_val[12];
 
+volatile int is_new_second = 0, should_toggle_mode = 0;
+
 void enable_monitor_mode() {
 	current_mode = MONITOR;
 
@@ -54,6 +56,10 @@ void toggle_mode() {
 	}
 }
 
+void toggle_isr() {
+	should_toggle_mode = 1;
+}
+
 void turn_off_blinking_rgb() {
 	rgb_also_clear_red();
 }
@@ -76,24 +82,35 @@ void display_values() {
 }
 
 void do_every_second() {
-	led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
-	led7seg_set_number(led7seg_display_val);
+	is_new_second = 1;
+}
 
-	if (led7seg_display_val == 5 ||
-		led7seg_display_val == 10 ||
-		led7seg_display_val == 15) {
+void loop() {
+	if (should_toggle_mode) {
+		should_toggle_mode = 0;
 
-		acc_read(&x, &y, &z);
-
-		systick_interrupt_enable();
-		temp_val = temp_read();
-		systick_interrupt_disable();
-		light_val = light_read();
-
-		display_values();
+		toggle_mode();
 	}
 
-	if (led7seg_display_val == 15) {
-		// Send values through UART
+	if (is_new_second) {
+		is_new_second = 0;
+
+		led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
+		led7seg_set_number(led7seg_display_val);
+
+		if (led7seg_display_val == 5 ||
+			led7seg_display_val == 10 ||
+			led7seg_display_val == 15) {
+
+			acc_read(&x, &y, &z);
+			temp_val = temp_read();
+			light_val = light_read();
+
+			display_values();
+		}
+
+		if (led7seg_display_val == 15) {
+			// Send values through UART
+		}
 	}
 }

@@ -28,17 +28,12 @@ uint32_t get_ms_ticks() {
 }
 
 // Setup SysTick Timer to interrupt at 1 msec intervals
-void systick_interrupt_enable() {
+void systick_interrupt_init() {
 	ms_ticks = 0;
 
 	if (SysTick_Config(SystemCoreClock / 1000)) {
 		while (1);  // Capture error
 	}
-	NVIC_SetPriority(SysTick_IRQn, 0);
-}
-
-void systick_interrupt_disable() {
-	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk;
 }
 
 void timer_interrupt_setup(uint8_t timer_num, uint32_t ms) {

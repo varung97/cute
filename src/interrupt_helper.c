@@ -49,6 +49,7 @@ void eint_interrupt_enable(uint8_t int_number, uint8_t extmode, uint8_t extpolar
 
 	LPC_SC->EXTMODE = (LPC_SC->EXTMODE & ~(1 << int_number)) | (extmode << int_number);
 	LPC_SC->EXTPOLAR = (LPC_SC->EXTPOLAR & ~(1 << int_number)) | (extpolar << int_number);
+	NVIC_ClearPendingIRQ(eint_config_table[int_number].IrqNumber);
 
 	if(int_number != 3) {
 		pin_config(1, 0, 0, 2, eint_config_table[int_number].pin_num);

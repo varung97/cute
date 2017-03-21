@@ -26,11 +26,14 @@
 
 typedef enum {PASSIVE, MONITOR} mode_type;
 
+#define LIGHT_LOW_WARNING 40
+#define TEMP_HIGH_WARNING 450
+
 void turn_off_blinking_rgb();
 void do_every_second();
 void toggle_isr();
 void loop();
-void read_light_sensor();
+void eint3_isr();
 
 
 #endif /* APPLICATION_LOGIC_H_ */

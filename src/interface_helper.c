@@ -72,7 +72,6 @@ void i2c_init(void) {
 }
 
 void gpio_init(void) {
-	// Initialize button
-	pin_config(0, 0, 0, 1, 31);
-	GPIO_SetDir(1, 1<<31, 0);
+	pin_config(0, 0, 2, 2, 5);
+	pin_set_dir(2, 5, 0);
 }

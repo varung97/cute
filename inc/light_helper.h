@@ -1,8 +1,8 @@
 #include "stdint.h"
 #include "light.h"
 
-void light_init (void);
-void light_enable (void);
+void lightInit(uint32_t light_low_threshold);
+void light_enable(void);
 uint32_t light_read(void);
 void light_setMode(light_mode_t mode);
 void light_setWidth(light_width_t width);

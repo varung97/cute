@@ -7,10 +7,6 @@
 
 #include "application_logic.h"
 
-#define LIGHT_LOW_WARNING 40
-#define LIGHT_HIGH_THRESHOLD 200
-#define TEMP_HIGH_WARNING 450
-
 uint8_t led7seg_display_val;
 
 mode_type current_mode = PASSIVE;
@@ -127,19 +123,4 @@ void eint3_isr(void) {
 			leds_also_turn_off(0x1);
 	}
 //	leds_also_turn_off(0x1);
-}
-
-void read_light_sensor() {
-	pin_config(0, 0, 2, 2, 5);
-	pin_set_dir(2, 5, 0);
-	light_setMode(LIGHT_MODE_D1);
-	light_setRange(LIGHT_RANGE_1000);
-	light_setWidth(LIGHT_WIDTH_16BITS);
-	light_setLoThreshold(LIGHT_LOW_WARNING);
-	light_setHiThreshold(LIGHT_HIGH_THRESHOLD);
-	light_setIrqInCycles(LIGHT_CYCLE_1);
-	light_clearIrqStatus();
-	gpio_interrupt_enable(2, 5);
-	eint_attach_interrupt(3, eint3_isr);
-	NVIC_ClearPendingIRQ(EINT3_IRQn);
 }

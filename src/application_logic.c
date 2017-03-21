@@ -36,9 +36,12 @@ void enable_passive_mode() {
 	current_mode = PASSIVE;
 
 	is_blue_rgb_on = is_red_rgb_on = 0;
-	led7seg_set_raw(0xFF);
+	rgb_also_clear_blue();
+	rgb_also_clear_red();
+
 	timer_interrupt_disable(TIMER0);
 	timer_interrupt_disable(TIMER1);
+	led7seg_set_raw(0xFF);
 	acc_setMode(ACC_MODE_STANDBY);
 	light_shutdown();
 	oled_clearScreen(OLED_COLOR_BLACK);

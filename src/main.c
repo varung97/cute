@@ -13,7 +13,9 @@
 int main(void) {
 	setup();
 
-    return 0;
+    while(1) {
+    	loop();
+    }
 }
 
 void check_failed(uint8_t *file, uint32_t line) {

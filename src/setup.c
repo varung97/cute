@@ -15,7 +15,7 @@ void init_interfaces() {
 
 void init_external_peripherals() {
 	acc_init();
-	light_init();
+	lightInit(LIGHT_LOW_WARNING);
 	temp_init(&get_ms_ticks);
 	rgb_init();
 	oled_init();
@@ -30,21 +30,29 @@ void init_external_peripherals() {
 void init_interrupts() {
 	timer_interrupt_setup(TIMER0, 1);
 	timer_interrupt_setup(TIMER1, 1);
+	systick_interrupt_init();
 }
 
 void attach_interrupts() {
 	timer_attach_interrupt(TIMER0, turn_off_blinking_rgb, 100, 1);
 	timer_attach_interrupt(TIMER1, do_every_second, 1000, 0);
-	eint_attach_interrupt(EINT0, toggle_mode);
+	eint_attach_interrupt(EINT0, toggle_isr);
+	eint_attach_interrupt(EINT3, eint3_isr);
 
 	NVIC_SetPriority(TIMER0_IRQn, 1);
 	NVIC_SetPriority(TIMER1_IRQn, 1);
 	NVIC_SetPriority(EINT0_IRQn, 2);
+	NVIC_SetPriority(EINT3_IRQn, 1);
+	NVIC_SetPriority(SysTick_IRQn, 0);
 }
 
 void enable_interrupts() {
-	eint_interrupt_enable(EINT0);
+	eint_interrupt_enable(EINT0, EDGE_TRIGGERED, ACTIVELOW_OR_FALLINGEDGE);
 	eint_interrupt_handler_enable(EINT0);
+	eint_interrupt_enable(EINT3, LEVEL_TRIGGERED, ACTIVELOW_OR_FALLINGEDGE);
+	eint_interrupt_handler_enable(EINT3);
+
+	gpio_interrupt_enable(2, 5);
 }
 
 void setup() {

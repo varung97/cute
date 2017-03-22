@@ -31,5 +31,6 @@ void eint_attach_interrupt(uint8_t int_number, eint_func_ptr func_ptr);
 void eint_interrupt_enable(uint8_t int_number, uint8_t extmode, uint8_t extpolar);
 void eint_interrupt_clear(uint8_t int_number);
 void eint_interrupt_handler_enable(uint8_t int_number);
+void eint_interrupt_handler_disable(uint8_t int_number);
 
 #endif

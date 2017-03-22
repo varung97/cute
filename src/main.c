@@ -6,6 +6,7 @@
  *
  ******************************************************************************/
 
+#include "stdio.h"
 #include "stdint.h"
 #include "LPC17xx.h"
 #include "setup.h"

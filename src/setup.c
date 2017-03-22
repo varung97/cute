@@ -53,6 +53,7 @@ void enable_interrupts() {
 	eint_interrupt_enable(EINT3, LEVEL_TRIGGERED, ACTIVELOW_OR_FALLINGEDGE);
 
 	gpio_interrupt_enable(2, 5);
+	gpio_interrupt_enable(0, 2);
 }
 
 void setup() {

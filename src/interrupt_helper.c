@@ -65,6 +65,7 @@ void eint_interrupt_clear(uint8_t int_number) {
 void eint_interrupt_handler_enable(uint8_t int_number) {
 	if (int_number >= EINT_MAX) return;
 
+	NVIC_ClearPendingIRQ(eint_config_table[int_number].IrqNumber);
 	NVIC_EnableIRQ(eint_config_table[int_number].IrqNumber);
 }
 

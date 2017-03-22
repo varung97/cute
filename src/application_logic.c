@@ -10,12 +10,11 @@
 uint8_t led7seg_display_val;
 
 mode_type current_mode = PASSIVE;
-int led = 0;
+volatile int led = 0;
 int8_t x, y, z;
 int32_t temp_val;
 uint32_t light_val;
 char str_val[12];
-char empty_string[6] = {32, 32, 32, 32, 32, 32};
 
 volatile int is_new_second = 0, should_toggle_mode = 0, is_rgb_leds_on = 0, is_blue_rgb_blinking = 0, is_red_rgb_blinking = 0;
 
@@ -27,13 +26,13 @@ void enable_monitor_mode() {
 
 	led7seg_display_val = is_blue_rgb_blinking = is_red_rgb_blinking = 0;
 	led7seg_set_number(led7seg_display_val);
-	timer_interrupt_enable(TIMER1);
 	acc_setMode(ACC_MODE_MEASURE);
 	light_enable();
 	temp_init(&get_ms_ticks);
 	oled_putString(0, 0, (uint8_t *) "MONITOR", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
 	timer_interrupt_enable(TIMER0);
+	timer_interrupt_enable(TIMER1);
 
 	eint_interrupt_handler_enable(EINT3);
 	current_temp_edges = 0;
@@ -86,26 +85,20 @@ void toggle_leds() {
 	}
 }
 
-void write_empty_string(uint8_t col, uint8_t row) {
-	oled_putString(col, row, (uint8_t *) empty_string, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-}
-
 void display_values() {
-	write_empty_string(47, 10);
-	sprintf(str_val, "Temp: %.1f", temp_val/10.0);
+	sprintf(str_val, "Temp: %.1f   ", temp_val/10.0);
 	oled_putString(0, 10, (uint8_t *) str_val, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
-	write_empty_string(55, 20);
-	sprintf(str_val, "Light: %d", (int) light_val);
+	sprintf(str_val, "Light: %d   ", (int) light_val);
 	oled_putString(0, 20, (uint8_t *) str_val, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
-	sprintf(str_val, "AX: %d", (int) x);
+	sprintf(str_val, "AX: %d   ", (int) x);
 	oled_putString(0, 30, (uint8_t *) str_val, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
-	sprintf(str_val, "AY: %d", (int) y);
+	sprintf(str_val, "AY: %d   ", (int) y);
 	oled_putString(0, 40, (uint8_t *) str_val, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
-	sprintf(str_val, "AZ: %d", (int) z);
+	sprintf(str_val, "AZ: %d   ", (int) z);
 	oled_putString(0, 50, (uint8_t *) str_val, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 }
 
@@ -160,9 +153,8 @@ void eint3_isr(void) {
 		// light interrupt
 		gpio_interrupt_clear(2, 5);
 		light_clearIrqStatus();
-		if (!is_blue_rgb_blinking) {
-			is_blue_rgb_blinking = 1;
-		}
+		is_blue_rgb_blinking = 1;
+		leds_only_turn_on(led = !led);
 	}
 	if (did_gpio_interrupt_occur(0, 2)) {
 		gpio_interrupt_clear(0, 2);

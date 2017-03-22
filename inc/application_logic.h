@@ -27,7 +27,7 @@
 typedef enum {PASSIVE, MONITOR} mode_type;
 
 #define LIGHT_LOW_WARNING 50
-#define TEMP_HIGH_WARNING 230
+#define TEMP_HIGH_WARNING 240
 
 void toggle_leds();
 void do_every_second();

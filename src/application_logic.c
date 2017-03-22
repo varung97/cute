@@ -16,12 +16,15 @@ int32_t temp_val;
 uint32_t light_val;
 char str_val[12];
 
-volatile int is_new_second = 0, should_toggle_mode = 0, blue_rgb = 0, red_rgb = 0, is_blue_rgb_on = 0, is_red_rgb_on = 0;
+volatile int is_new_second = 0, should_toggle_mode = 0, is_rgb_leds_on = 0, is_blue_rgb_blinking = 0, is_red_rgb_blinking = 0;
+
+uint32_t prev_ms_temp = 0;
+volatile int current_temp_edges = 0;
 
 void enable_monitor_mode() {
 	current_mode = MONITOR;
 
-	led7seg_display_val = is_blue_rgb_on = is_red_rgb_on = 0;
+	led7seg_display_val = is_blue_rgb_blinking = is_red_rgb_blinking = 0;
 	led7seg_set_number(led7seg_display_val);
 	timer_interrupt_enable(TIMER1);
 	acc_setMode(ACC_MODE_MEASURE);
@@ -29,13 +32,18 @@ void enable_monitor_mode() {
 	temp_init(&get_ms_ticks);
 	oled_putString(0, 0, (uint8_t *) "MONITOR", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
+	timer_interrupt_enable(TIMER0);
+
+	gpio_interrupt_enable(0, 2);
 	eint_interrupt_handler_enable(EINT3);
+	current_temp_edges = 0;
+	prev_ms_temp = get_ms_ticks();
 }
 
 void enable_passive_mode() {
 	current_mode = PASSIVE;
 
-	is_blue_rgb_on = is_red_rgb_on = 0;
+	is_blue_rgb_blinking = is_red_rgb_blinking = 0;
 	rgb_also_clear_blue();
 	rgb_also_clear_red();
 
@@ -67,14 +75,14 @@ void toggle_isr() {
 }
 
 void toggle_leds() {
-	if (is_blue_rgb_on) {
-		blue_rgb = !blue_rgb;
-		blue_rgb ? rgb_also_set_blue() : rgb_also_clear_blue();
+	is_rgb_leds_on = !is_rgb_leds_on;
+
+	if (is_blue_rgb_blinking) {
+		is_rgb_leds_on ? rgb_also_set_blue() : rgb_also_clear_blue();
 	}
 
-	if (is_red_rgb_on) {
-		red_rgb = !red_rgb;
-		red_rgb ? rgb_also_set_red() : rgb_also_clear_red();
+	if (is_red_rgb_blinking) {
+		is_rgb_leds_on ? rgb_also_set_red() : rgb_also_clear_red();
 	}
 }
 
@@ -117,26 +125,41 @@ void loop() {
 			led7seg_display_val == 15) {
 
 			acc_read(&x, &y, &z);
-			temp_val = temp_read();
 			light_val = light_read();
 
+			eint_interrupt_handler_disable(EINT3);
 			display_values();
+			eint_interrupt_handler_enable(EINT3);
+			current_temp_edges = 0;
+			prev_ms_temp = get_ms_ticks();
 		}
 
 		if (led7seg_display_val == 15) {
 			// Send values through UART
 		}
 	}
+
+	if (current_temp_edges == 333) {
+		current_temp_edges = 0;
+		temp_val = (get_ms_ticks() - prev_ms_temp) * 3 - 2731;
+		prev_ms_temp = get_ms_ticks();
+		if (temp_val > TEMP_HIGH_WARNING) {
+			is_red_rgb_blinking = 1;
+		}
+	}
 }
 
 void eint3_isr(void) {
-	if(did_gpio_interrupt_occur(2, 5)) {
+	if (did_gpio_interrupt_occur(2, 5)) {
 		// light interrupt
 		gpio_interrupt_clear(2, 5);
 		light_clearIrqStatus();
-		if (!is_blue_rgb_on) {
-			is_blue_rgb_on = 1;
-			timer_interrupt_enable(TIMER0);
+		if (!is_blue_rgb_blinking) {
+			is_blue_rgb_blinking = 1;
 		}
+	}
+	if (did_gpio_interrupt_occur(0, 2)) {
+		gpio_interrupt_clear(0, 2);
+		current_temp_edges++;
 	}
 }

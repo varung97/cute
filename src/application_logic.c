@@ -139,12 +139,12 @@ void loop() {
 	}
 
 	if (current_temp_edges == 333) {
-		current_temp_edges = 0;
 		temp_val = (get_ms_ticks() - prev_ms_temp) * 3 - 2731;
-		prev_ms_temp = get_ms_ticks();
 		if (temp_val > TEMP_HIGH_WARNING) {
 			is_red_rgb_blinking = 1;
 		}
+		current_temp_edges = 0;
+		prev_ms_temp = get_ms_ticks();
 	}
 }
 

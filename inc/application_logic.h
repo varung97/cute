@@ -34,6 +34,7 @@ void do_every_second();
 void toggle_isr();
 void loop();
 void eint3_isr();
+void pwm();
 
 
 #endif /* APPLICATION_LOGIC_H_ */

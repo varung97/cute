@@ -28,20 +28,23 @@ void init_external_peripherals() {
 }
 
 void init_interrupts() {
-	timer_interrupt_setup(TIMER0, 1);
-	timer_interrupt_setup(TIMER1, 1);
+	timer_interrupt_setup(TIMER0, 1000);
+	timer_interrupt_setup(TIMER1, 1000);
+	timer_interrupt_setup(TIMER2, 500);
 	systick_interrupt_init();
 }
 
 void attach_interrupts() {
 	timer_attach_interrupt(TIMER0, toggle_leds, 300, 0);
 	timer_attach_interrupt(TIMER1, do_every_second, 1000, 0);
+	timer_attach_interrupt(TIMER2, pwm, 1, 0);
 	eint_attach_interrupt(EINT0, toggle_isr);
 	eint_attach_interrupt(EINT3, eint3_isr);
 
 	NVIC_SetPriorityGrouping(4);
 	NVIC_SetPriority(TIMER0_IRQn, 8);
 	NVIC_SetPriority(TIMER1_IRQn, 5);
+	NVIC_SetPriority(TIMER2_IRQn, 1);
 	NVIC_SetPriority(EINT0_IRQn, 12);
 	NVIC_SetPriority(EINT3_IRQn, 4);
 	NVIC_SetPriority(SysTick_IRQn, 0);

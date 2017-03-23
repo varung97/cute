@@ -178,7 +178,6 @@ void loop() {
 			acc_read(&x, &y, &z);
 			light_val = light_read();
 			pwm_val = (light_val * 20) / LIGHT_RANGE + 1;
-			leds_only_turn_on(pwm_val);
 
 			eint_interrupt_handler_disable(EINT3);
 			display_values();

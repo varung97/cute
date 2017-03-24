@@ -36,13 +36,13 @@ void systick_interrupt_init() {
 	}
 }
 
-void timer_interrupt_setup(uint8_t timer_num, uint32_t ms) {
+void timer_interrupt_setup(uint8_t timer_num, uint32_t us) {
 	if (timer_num >= TIMER_MAX) return;
 
 	LPC_TIM_TypeDef* timer = timer_config_table[timer_num].TIMx;
 	TIM_TIMERCFG_Type timer_config;
 	TIM_ConfigStructInit(TIM_TIMER_MODE, &timer_config);
-	timer_config.PrescaleValue = ms * 1000;
+	timer_config.PrescaleValue = us;
 	TIM_Init(timer, TIM_TIMER_MODE, &timer_config);
 }
 

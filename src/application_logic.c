@@ -26,8 +26,23 @@ volatile int is_new_second = 0,
 		     pwm_count = 0,
 		     pwm_val = 10;
 
-uint32_t prev_ms_temp = 0;
-volatile int current_temp_edges = 0;
+volatile uint32_t temp_curr_time = 0;
+volatile int should_update_temp = 0, start = 0, end = 0;
+volatile uint32_t temp_times[334] = {0};
+
+void temp_reset_times() {
+	start = end = 333;
+	should_update_temp = temp_curr_time = 0;
+}
+
+void temp_update_times() {
+	end = end == 333 ? 0 : end + 1;
+	temp_times[end] = temp_curr_time;
+	if (end == start) {
+		start = start == 333 ? 0 : start + 1;
+		temp_val = (temp_times[end] - temp_times[start]) * 3 - 2731;
+	}
+}
 
 void turn_off_blue_and_red_rgbs() {
 	rgb_also_clear_blue();
@@ -58,8 +73,7 @@ void enable_monitor_mode() {
 	gpio_interrupt_clear(0, 2);
 
 	eint_interrupt_handler_enable(EINT3);
-	current_temp_edges = 0;
-	prev_ms_temp = get_ms_ticks();
+	temp_reset_times();
 }
 
 void enable_passive_mode() {
@@ -157,7 +171,8 @@ void eint3_isr(void) {
 	}
 	if (did_gpio_interrupt_occur(0, 2)) {
 		gpio_interrupt_clear(0, 2);
-		current_temp_edges++;
+		temp_curr_time = get_ms_ticks();
+		should_update_temp = 1;
 	}
 }
 
@@ -182,8 +197,7 @@ void loop() {
 			eint_interrupt_handler_disable(EINT3);
 			display_values();
 			eint_interrupt_handler_enable(EINT3);
-			current_temp_edges = 0;
-			prev_ms_temp = get_ms_ticks();
+			temp_reset_times();
 		}
 
 		if (led7seg_display_val == 15) {
@@ -191,12 +205,11 @@ void loop() {
 		}
 	}
 
-	if (current_temp_edges == 333) {
-		temp_val = (get_ms_ticks() - prev_ms_temp) * 3 - 2731;
+	if (should_update_temp) {
+		temp_update_times();
 		if (temp_val > TEMP_HIGH_WARNING) {
 			is_red_rgb_blinking = 1;
 		}
-		current_temp_edges = 0;
-		prev_ms_temp = get_ms_ticks();
+		should_update_temp = 0;
 	}
 }

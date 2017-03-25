@@ -161,6 +161,20 @@ void eint3_isr(void) {
 	}
 }
 
+void acc_interrupt(void) {
+	if(did_gpio_interrupt_occur(0, 3)) {
+		gpio_interrupt_clear(0, 3);
+		acc_interrupt_clear();
+		leds_only_turn_off(0x4);
+	}
+}
+
+void read_acc_value() {
+	pin_config(0, 0, 0, 0, 3);
+	pin_set_dir(0, 3, 0);
+	acc_enable_interrupt();
+}
+
 void loop() {
 	if (should_toggle_mode) {
 		should_toggle_mode = 0;

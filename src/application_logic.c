@@ -9,14 +9,17 @@
 
 #define LIGHT_RANGE 973
 
-uint8_t led7seg_display_val;
-
 mode_type current_mode = PASSIVE;
+
+uint8_t led7seg_display_val;
+int seconds_passed = 0;
 volatile int led = 0;
+
 int8_t x, y, z;
 int32_t temp_val;
 uint32_t light_val;
 char str_val[12];
+char uart_str[50];
 
 volatile int is_new_second = 0,
 		     should_toggle_mode = 0,
@@ -28,6 +31,11 @@ volatile int is_new_second = 0,
 
 uint32_t prev_ms_temp = 0;
 volatile int current_temp_edges = 0;
+
+
+/**********************************************************
+ * Helper functions
+ ***********************************************************/
 
 void turn_off_blue_and_red_rgbs() {
 	rgb_also_clear_blue();
@@ -92,18 +100,6 @@ void toggle_mode() {
 	}
 }
 
-void toggle_leds() {
-	is_rgb_leds_on = !is_rgb_leds_on;
-
-	if (is_rgb_leds_on) {
-		pwm_count = 19;
-		timer_interrupt_enable(TIMER2);
-	} else {
-		timer_interrupt_disable(TIMER2);
-		turn_off_blue_and_red_rgbs();
-	}
-}
-
 void display_values() {
 	sprintf(str_val, "Temp: %.1f   ", temp_val/10.0);
 	oled_putString(0, 10, (uint8_t *) str_val, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
@@ -121,8 +117,39 @@ void display_values() {
 	oled_putString(0, 50, (uint8_t *) str_val, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 }
 
+void uart_transmit_vals() {
+	if (is_red_rgb_blinking) {
+		uart_send("Fire was Detected.\r\n");
+	}
+	if (is_blue_rgb_blinking) {
+		uart_send("Movement in darkness was Detected.\r\n");
+	}
+
+	sprintf(uart_str, "%3d_-_T%.1f_L%d_AX%d_AY%d_AZ%d\r\n", seconds_passed, temp_val / 10.0, (int) light_val, (int) x, (int) y, (int) z);
+	uart_send(uart_str);
+}
+
 int should_read_vals() {
 	return led7seg_display_val == 5 || led7seg_display_val == 10 || led7seg_display_val == 15;
+}
+
+
+
+
+/**********************************************************
+ * ISRs
+ **********************************************************/
+
+void toggle_leds() {
+	is_rgb_leds_on = !is_rgb_leds_on;
+
+	if (is_rgb_leds_on) {
+		pwm_count = 19;
+		timer_interrupt_enable(TIMER2);
+	} else {
+		timer_interrupt_disable(TIMER2);
+		turn_off_blue_and_red_rgbs();
+	}
 }
 
 void pwm() {
@@ -161,6 +188,10 @@ void eint3_isr(void) {
 	}
 }
 
+/**********************************************************
+ * Loop
+ **********************************************************/
+
 void loop() {
 	if (should_toggle_mode) {
 		should_toggle_mode = 0;
@@ -170,6 +201,8 @@ void loop() {
 
 	if (is_new_second) {
 		is_new_second = 0;
+
+		seconds_passed++;
 
 		led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
 		led7seg_set_number(led7seg_display_val);
@@ -187,7 +220,7 @@ void loop() {
 		}
 
 		if (led7seg_display_val == 15) {
-			// Send values through UART
+			uart_transmit_vals();
 		}
 	}
 

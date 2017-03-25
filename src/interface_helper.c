@@ -75,3 +75,46 @@ void gpio_init(void) {
 	pin_config(0, 0, 2, 2, 5);
 	pin_set_dir(2, 5, 0);
 }
+
+void uart_init(void) {
+	pin_config(2, 0, 0, 0, 0);
+	pin_config(2, 0, 0, 0, 1);
+
+	UART_CFG_Type uartCfg;
+	uartCfg.Baud_rate = 115200;
+	uartCfg.Databits = UART_DATABIT_8;
+	uartCfg.Parity = UART_PARITY_NONE;
+	uartCfg.Stopbits = UART_STOPBIT_1;
+
+	UART_Init(LPC_UART3, &uartCfg);
+	UART_TxCmd(LPC_UART3, ENABLE);
+}
+
+void uart_interrupt_enable() {
+	NVIC_EnableIRQ(UART3_IRQn);
+}
+
+void uart_send(char str[]) {
+	UART_SendString(LPC_UART3, (uint8_t *) str);
+}
+
+char to_send[];
+uint8_t amt_left;
+
+void uart_send_notblocking(char str[]) {
+	to_send = str;
+	amt_left = strlen(str);
+
+	UART_IntConfig(LPC_UART3, UART_INTCFG_THRE, ENABLE);
+}
+
+void uart_queue_into_fifo() {
+	UART_Send(LPC_UART3, to_send, amt_left < 16 ? amt_left : 16, NONE_BLOCKING);
+
+	if (amt_left < 16) {
+		UART_IntConfig(LPC_UART3, UART_INTCFG_THRE, DISABLE);
+	} else {
+		amt_left -= 16;
+		to_send += 16;
+	}
+}

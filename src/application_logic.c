@@ -27,7 +27,8 @@ volatile int is_new_second = 0,
 		     is_blue_rgb_blinking = 0,
 		     is_red_rgb_blinking = 0,
 		     pwm_count = 0,
-		     pwm_val = 10;
+		     pwm_val = 10,
+		     uart_should_queue = 0;
 
 uint32_t prev_ms_temp = 0;
 volatile int current_temp_edges = 0;
@@ -50,7 +51,7 @@ void conditionally_turn_on_blue_and_red_rgbs() {
 void enable_monitor_mode() {
 	current_mode = MONITOR;
 
-	led7seg_display_val = is_blue_rgb_blinking = is_red_rgb_blinking = 0;
+	led7seg_display_val = is_blue_rgb_blinking = is_red_rgb_blinking = uart_should_queue = 0;
 	pwm_val = 10;
 
 	led7seg_set_number(led7seg_display_val);
@@ -126,14 +127,15 @@ void uart_transmit_vals() {
 	}
 
 	sprintf(uart_str, "%3d_-_T%.1f_L%d_AX%d_AY%d_AZ%d\r\n", seconds_passed, temp_val / 10.0, (int) light_val, (int) x, (int) y, (int) z);
-	uart_send(uart_str);
+//	uart_send(uart_str);
+
+	// Change the other sends also later
+	uart_send_notblocking(uart_str);
 }
 
 int should_read_vals() {
 	return led7seg_display_val == 5 || led7seg_display_val == 10 || led7seg_display_val == 15;
 }
-
-
 
 
 /**********************************************************
@@ -188,6 +190,10 @@ void eint3_isr(void) {
 	}
 }
 
+void uart_thre_isr() {
+	uart_should_queue = 1;
+}
+
 /**********************************************************
  * Loop
  **********************************************************/
@@ -231,5 +237,10 @@ void loop() {
 		}
 		current_temp_edges = 0;
 		prev_ms_temp = get_ms_ticks();
+	}
+
+	if (uart_should_queue) {
+		uart_queue_into_fifo();
+		uart_should_queue = 0;
 	}
 }

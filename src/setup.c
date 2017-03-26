@@ -41,6 +41,7 @@ void attach_interrupts() {
 	timer_attach_interrupt(TIMER2, pwm, 1, 0);
 	eint_attach_interrupt(EINT0, toggle_isr);
 	eint_attach_interrupt(EINT3, eint3_isr);
+	uart_attach_interrupt(THRE, uart_thre_isr);
 }
 
 void set_interrupt_priorities() {

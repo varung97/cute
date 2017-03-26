@@ -98,18 +98,22 @@ void uart_send(char str[]) {
 	UART_SendString(LPC_UART3, (uint8_t *) str);
 }
 
-char to_send[];
+char* to_send;
 uint8_t amt_left;
 
+/**
+ * Should have max length of 100 chars
+ */
 void uart_send_notblocking(char str[]) {
 	to_send = str;
 	amt_left = strlen(str);
 
 	UART_IntConfig(LPC_UART3, UART_INTCFG_THRE, ENABLE);
+	// may have to queue initial chars
 }
 
 void uart_queue_into_fifo() {
-	UART_Send(LPC_UART3, to_send, amt_left < 16 ? amt_left : 16, NONE_BLOCKING);
+	UART_Send(LPC_UART3, (uint8_t *) to_send, amt_left < 16 ? amt_left : 16, NONE_BLOCKING);
 
 	if (amt_left < 16) {
 		UART_IntConfig(LPC_UART3, UART_INTCFG_THRE, DISABLE);
@@ -117,4 +121,18 @@ void uart_queue_into_fifo() {
 		amt_left -= 16;
 		to_send += 16;
 	}
+}
+
+void uart_attach_interrupt(uart_int_type int_type, uart_int_func_ptr func_ptr) {
+	switch (int_type) {
+		case THRE:
+			UART_SetupCbs(LPC_UART3, 1, func_ptr);
+			break;
+		default:
+			break;
+	}
+}
+
+void UART3_IRQHandler() {
+	UART3_StdIntHandler();
 }

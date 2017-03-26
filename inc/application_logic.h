@@ -35,6 +35,7 @@ void toggle_isr();
 void loop();
 void eint3_isr();
 void pwm();
+void uart_thre_isr();
 
 
 #endif /* APPLICATION_LOGIC_H_ */

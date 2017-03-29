@@ -12,14 +12,14 @@
 mode_type current_mode = PASSIVE;
 
 uint8_t led7seg_display_val;
-int seconds_passed = 0;
+int num_transmissions = 0;
 volatile int led = 0;
 
 int8_t x, y, z;
 int32_t temp_val;
 uint32_t light_val;
 char str_val[12];
-char uart_str[50];
+char uart_str[120];
 
 volatile int is_new_second = 0,
 		     should_toggle_mode = 0,
@@ -51,12 +51,13 @@ void conditionally_turn_on_blue_and_red_rgbs() {
 void enable_monitor_mode() {
 	current_mode = MONITOR;
 
-	led7seg_display_val = is_blue_rgb_blinking = is_red_rgb_blinking = uart_should_queue = 0;
+	led7seg_display_val = is_blue_rgb_blinking = is_red_rgb_blinking = uart_should_queue = num_transmissions = 0;
 	pwm_val = 10;
 
 	led7seg_set_number(led7seg_display_val);
 	acc_setMode(ACC_MODE_MEASURE);
 	light_enable();
+	uart_enable();
 	oled_putString(0, 0, (uint8_t *) "MONITOR", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
 	timer_interrupt_enable(TIMER0);
@@ -74,18 +75,19 @@ void enable_monitor_mode() {
 void enable_passive_mode() {
 	current_mode = PASSIVE;
 
-	led7seg_set_raw(0xFF);
-	acc_setMode(ACC_MODE_STANDBY);
-	light_shutdown();
-	oled_clearScreen(OLED_COLOR_BLACK);
-
-	turn_off_blue_and_red_rgbs();
-
 	timer_interrupt_disable(TIMER0);
 	timer_interrupt_disable(TIMER1);
 	timer_interrupt_disable(TIMER2);
 
 	eint_interrupt_handler_disable(EINT3);
+
+	led7seg_set_raw(0xFF);
+	acc_setMode(ACC_MODE_STANDBY);
+	light_shutdown();
+	uart_disable();
+	oled_clearScreen(OLED_COLOR_BLACK);
+
+	turn_off_blue_and_red_rgbs();
 }
 
 void toggle_mode() {
@@ -119,17 +121,20 @@ void display_values() {
 }
 
 void uart_transmit_vals() {
-	if (is_red_rgb_blinking) {
-		uart_send("Fire was Detected.\r\n");
-	}
-	if (is_blue_rgb_blinking) {
-		uart_send("Movement in darkness was Detected.\r\n");
-	}
+	num_transmissions++;
 
-	sprintf(uart_str, "%3d_-_T%.1f_L%d_AX%d_AY%d_AZ%d\r\n", seconds_passed, temp_val / 10.0, (int) light_val, (int) x, (int) y, (int) z);
-//	uart_send(uart_str);
+	sprintf(uart_str,
+			"%s%s%03d_-_T%.1f_L%04d_AX%03d_AY%03d_AZ%03d\r\n",
+			is_red_rgb_blinking  ? "Fire was Detected.\r\n" : "",
+			is_blue_rgb_blinking ? "Movement in darkness was Detected.\r\n" : "",
+			num_transmissions,
+			temp_val / 10.0,
+			(int) light_val,
+			(int) x,
+			(int) y,
+			(int) z
+		   );
 
-	// Change the other sends also later
 	uart_send_notblocking(uart_str);
 }
 
@@ -207,8 +212,6 @@ void loop() {
 
 	if (is_new_second) {
 		is_new_second = 0;
-
-		seconds_passed++;
 
 		led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
 		led7seg_set_number(led7seg_display_val);

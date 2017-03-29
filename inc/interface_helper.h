@@ -25,6 +25,8 @@ void i2c_init();
 void ssp_init();
 void gpio_init();
 void uart_init();
+void uart_enable();
+void uart_disable();
 void uart_interrupt_enable();
 void uart_send(char str[]);
 void uart_send_notblocking(char str[]);

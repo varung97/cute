@@ -87,7 +87,21 @@ void uart_init(void) {
 	uartCfg.Stopbits = UART_STOPBIT_1;
 
 	UART_Init(LPC_UART3, &uartCfg);
+}
+
+void uart_enable(void) {
+	UART_SendData(LPC_UART3, 0);
+	UART_SendData(LPC_UART3, 0);
+
+	UART_FIFO_CFG_Type fifoCfg;
+	UART_FIFOConfigStructInit(&fifoCfg);
+	UART_FIFOConfig(LPC_UART3, &fifoCfg);
+
 	UART_TxCmd(LPC_UART3, ENABLE);
+}
+
+void uart_disable(void) {
+	UART_TxCmd(LPC_UART3, DISABLE);
 }
 
 void uart_interrupt_enable() {
@@ -99,7 +113,7 @@ void uart_send(char str[]) {
 }
 
 char* to_send;
-uint8_t amt_left;
+int amt_left;
 
 /**
  * Should have max length of 100 chars
@@ -109,17 +123,16 @@ void uart_send_notblocking(char str[]) {
 	amt_left = strlen(str);
 
 	UART_IntConfig(LPC_UART3, UART_INTCFG_THRE, ENABLE);
-	// may have to queue initial chars
 }
 
 void uart_queue_into_fifo() {
-	UART_Send(LPC_UART3, (uint8_t *) to_send, amt_left < 16 ? amt_left : 16, NONE_BLOCKING);
+	UART_Send(LPC_UART3, (uint8_t *) to_send, amt_left <= UART_TX_FIFO_SIZE ? amt_left : UART_TX_FIFO_SIZE, NONE_BLOCKING);
 
-	if (amt_left < 16) {
+	amt_left -= UART_TX_FIFO_SIZE;
+	if (amt_left <= 0) {
 		UART_IntConfig(LPC_UART3, UART_INTCFG_THRE, DISABLE);
 	} else {
-		amt_left -= 16;
-		to_send += 16;
+		to_send += UART_TX_FIFO_SIZE;
 	}
 }
 

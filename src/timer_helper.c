@@ -67,6 +67,7 @@ void timer_attach_interrupt(uint8_t timer_num, timer_func_ptr timer_func, uint32
 void timer_interrupt_enable(uint8_t timer_num) {
 	if (timer_num >= TIMER_MAX) return;
 
+	NVIC_ClearPendingIRQ(timer_config_table[timer_num].IrqNumber);
 	NVIC_EnableIRQ(timer_config_table[timer_num].IrqNumber);
 	TIM_Cmd(timer_config_table[timer_num].TIMx, ENABLE);
 }

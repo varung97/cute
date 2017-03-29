@@ -35,7 +35,7 @@ void init_interrupts() {
 }
 
 void attach_interrupts() {
-	timer_attach_interrupt(TIMER0, toggle_leds, 300, 0);
+	timer_attach_interrupt(TIMER0, toggle_leds, 333, 0);
 	timer_attach_interrupt(TIMER1, do_every_second, 1000, 0);
 	timer_attach_interrupt(TIMER2, pwm, 1, 0);
 	eint_attach_interrupt(EINT0, toggle_isr);
@@ -67,5 +67,3 @@ void setup() {
 	attach_interrupts();
 	enable_interrupts();
 }
-
-

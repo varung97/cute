@@ -263,6 +263,6 @@ void loop() {
 
 	if (uart_new_data_available) {
 		uart_new_data_available = 0;
-		oled_putString(0, 0, (uint8_t *) (uart_recv + 8), OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+		oled_putString(0, 0, (uint8_t *) uart_recv, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	}
 }

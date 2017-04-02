@@ -76,5 +76,3 @@ void setup() {
 	attach_interrupts();
 	enable_interrupts();
 }
-
-

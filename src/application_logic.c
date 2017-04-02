@@ -20,6 +20,7 @@ int32_t temp_val;
 uint32_t light_val;
 char str_val[12];
 char uart_str[120];
+char uart_recv[120];
 
 volatile int is_new_second = 0,
 		should_toggle_mode = 0,
@@ -28,7 +29,8 @@ volatile int is_new_second = 0,
 		is_red_rgb_blinking = 0,
 		pwm_count = 0,
 		pwm_val = 10,
-		uart_should_queue = 0;
+		uart_should_queue = 0,
+		uart_new_data_available = 0;
 
 uint32_t prev_ms_temp = 0;
 volatile int current_temp_edges = 0;
@@ -203,6 +205,10 @@ void uart_thre_isr() {
 	uart_should_queue = 1;
 }
 
+void uart_rxav_isr() {
+	uart_new_data_available = 1;
+}
+
 /**********************************************************
  * Loop
  **********************************************************/
@@ -226,15 +232,14 @@ void loop() {
 			light_val = light_read();
 			pwm_val = (light_val * 20) / LIGHT_RANGE + 1;
 
-			eint_interrupt_handler_disable(EINT3);
-
 			if (led7seg_display_val == 15) {
 				uart_transmit_vals();
 			}
 
+			eint_interrupt_handler_disable(EINT3);
 			display_values();
-
 			eint_interrupt_handler_enable(EINT3);
+
 			current_temp_edges = 0;
 			prev_ms_temp = get_ms_ticks();
 		}
@@ -254,5 +259,12 @@ void loop() {
 	if (uart_should_queue) {
 		uart_queue_into_fifo();
 		uart_should_queue = 0;
+	}
+
+	if (uart_new_data_available) {
+		if(uart_receive_notblocking(uart_recv)) {
+			// Finished receiving, do something
+			oled_putString(0, 20, (uint8_t *) uart_recv, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+		}
 	}
 }

@@ -132,13 +132,13 @@ void uart_transmit_vals() {
 	sprintf(uart_str,
 			"%s%s%03d_-_T%.1f_L%04d_AX%03d_AY%03d_AZ%03d\r\n",
 			is_red_rgb_blinking  ? "Fire was Detected.\r\n" : "",
-					is_blue_rgb_blinking ? "Movement in darkness was Detected.\r\n" : "",
-							num_transmissions,
-							temp_val / 10.0,
-							(int) light_val,
-							(int) x,
-							(int) y,
-							(int) z
+			is_blue_rgb_blinking ? "Movement in darkness was Detected.\r\n" : "",
+			num_transmissions,
+			temp_val / 10.0,
+			(int) light_val,
+			(int) x,
+			(int) y,
+			(int) z
 	);
 
 	uart_send_notblocking(uart_str);
@@ -206,7 +206,7 @@ void uart_thre_isr() {
 }
 
 void uart_rxav_isr() {
-	uart_new_data_available = 1;
+	uart_new_data_available = uart_receive_notblocking(uart_recv);
 }
 
 /**********************************************************
@@ -262,9 +262,7 @@ void loop() {
 	}
 
 	if (uart_new_data_available) {
-		if(uart_receive_notblocking(uart_recv)) {
-			// Finished receiving, do something
-			oled_putString(0, 20, (uint8_t *) uart_recv, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-		}
+		uart_new_data_available = 0;
+		oled_putString(0, 0, (uint8_t *) (uart_recv + 8), OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	}
 }

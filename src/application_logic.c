@@ -11,24 +11,26 @@
 
 mode_type current_mode = PASSIVE;
 
+int8_t x, y, z;
 uint8_t led7seg_display_val;
 int num_transmissions = 0;
 volatile int led = 0;
 
-int8_t x, y, z;
 int32_t temp_val;
 uint32_t light_val;
 char str_val[12];
 char uart_str[120];
+char uart_recv[120];
 
 volatile int is_new_second = 0,
-		     should_toggle_mode = 0,
-		     is_rgb_leds_on = 0,
-		     is_blue_rgb_blinking = 0,
-		     is_red_rgb_blinking = 0,
-		     pwm_count = 0,
-		     pwm_val = 10,
-		     uart_should_queue = 0;
+		should_toggle_mode = 0,
+		is_rgb_leds_on = 0,
+		is_blue_rgb_blinking = 0,
+		is_red_rgb_blinking = 0,
+		pwm_count = 0,
+		pwm_val = 10,
+		uart_should_queue = 0,
+		uart_new_data_available = 0;
 
 uint32_t prev_ms_temp = 0;
 volatile int current_temp_edges = 0;
@@ -104,19 +106,23 @@ void toggle_mode() {
 }
 
 void display_values() {
+	int8_t x1 = x;
+	int8_t y1 = y;
+	int8_t z1 = z;
+
 	sprintf(str_val, "Temp: %.1f   ", temp_val/10.0);
 	oled_putString(0, 10, (uint8_t *) str_val, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
 	sprintf(str_val, "Light: %d   ", (int) light_val);
 	oled_putString(0, 20, (uint8_t *) str_val, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
-	sprintf(str_val, "AX: %d   ", (int) x);
+	sprintf(str_val, "AX: %d   ", (int) x1);
 	oled_putString(0, 30, (uint8_t *) str_val, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
-	sprintf(str_val, "AY: %d   ", (int) y);
+	sprintf(str_val, "AY: %d   ", (int) y1);
 	oled_putString(0, 40, (uint8_t *) str_val, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
-	sprintf(str_val, "AZ: %d   ", (int) z);
+	sprintf(str_val, "AZ: %d   ", (int) z1);
 	oled_putString(0, 50, (uint8_t *) str_val, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 }
 
@@ -126,14 +132,14 @@ void uart_transmit_vals() {
 	sprintf(uart_str,
 			"%s%s%03d_-_T%.1f_L%04d_AX%03d_AY%03d_AZ%03d\r\n",
 			is_red_rgb_blinking  ? "Fire was Detected.\r\n" : "",
-			is_blue_rgb_blinking ? "Movement in darkness was Detected.\r\n" : "",
-			num_transmissions,
-			temp_val / 10.0,
-			(int) light_val,
-			(int) x,
-			(int) y,
-			(int) z
-		   );
+					is_blue_rgb_blinking ? "Movement in darkness was Detected.\r\n" : "",
+							num_transmissions,
+							temp_val / 10.0,
+							(int) light_val,
+							(int) x,
+							(int) y,
+							(int) z
+	);
 
 	uart_send_notblocking(uart_str);
 }
@@ -199,6 +205,10 @@ void uart_thre_isr() {
 	uart_should_queue = 1;
 }
 
+void uart_rxav_isr() {
+	uart_new_data_available = 1;
+}
+
 /**********************************************************
  * Loop
  **********************************************************/
@@ -218,19 +228,23 @@ void loop() {
 
 		if (should_read_vals()) {
 			acc_read(&x, &y, &z);
+
 			light_val = light_read();
 			pwm_val = (light_val * 20) / LIGHT_RANGE + 1;
+
+			if (led7seg_display_val == 15) {
+				uart_transmit_vals();
+			}
 
 			eint_interrupt_handler_disable(EINT3);
 			display_values();
 			eint_interrupt_handler_enable(EINT3);
+
 			current_temp_edges = 0;
 			prev_ms_temp = get_ms_ticks();
 		}
 
-		if (led7seg_display_val == 15) {
-			uart_transmit_vals();
-		}
+
 	}
 
 	if (current_temp_edges == 333) {
@@ -245,5 +259,12 @@ void loop() {
 	if (uart_should_queue) {
 		uart_queue_into_fifo();
 		uart_should_queue = 0;
+	}
+
+	if (uart_new_data_available) {
+		if(uart_receive_notblocking(uart_recv)) {
+			// Finished receiving, do something
+			oled_putString(0, 20, (uint8_t *) uart_recv, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+		}
 	}
 }

@@ -95,7 +95,7 @@ void uart_enable(void) {
 
 	UART_FIFO_CFG_Type fifoCfg;
 	UART_FIFOConfigStructInit(&fifoCfg);
-	fifoCfg.FIFO_Level = UART_FIFO_TRGLEV3;
+	fifoCfg->FIFO_Level = UART_FIFO_TRGLEV3;
 	UART_FIFOConfig(LPC_UART3, &fifoCfg);
 
 	UART_TxCmd(LPC_UART3, ENABLE);
@@ -116,8 +116,7 @@ void uart_send(char str[]) {
 	UART_SendString(LPC_UART3, (uint8_t *) str);
 }
 
-char* to_send;
-char* buf;
+char* to_send, buf;
 int amt_left, amt_recv, uart_receiving_in_progress = 0;
 
 /**
@@ -142,14 +141,6 @@ void uart_queue_into_fifo() {
 }
 
 // Returns whether terminating character was received
-int uart_get_from_rbr() {
-	uint32_t amt_just_recv = UART_Receive(LPC_UART3, (uint8_t *) buf, 16, NONE_BLOCKING);
-	amt_recv += amt_just_recv;
-	buf += amt_just_recv;
-	return (buf - 1)[0] == '\r';
-}
-
-// Returns whether terminating character was received
 int uart_receive_notblocking(char* bufin) {
 	if (!uart_receiving_in_progress) {
 		uart_receiving_in_progress = 1;
@@ -166,13 +157,21 @@ int uart_receive_notblocking(char* bufin) {
 	}
 }
 
+// Returns whether terminating character was received
+int uart_get_from_rbr() {
+	uint32_t amt_just_recv = UART_Receive(LPC_UART3, (uint8_t *) buf, 16, NONE_BLOCKING);
+	amt_recv += amt_just_recv;
+	buf += amt_just_recv;
+	return (buf - 1)[0] == '\r';
+}
+
 void uart_attach_interrupt(uart_int_type int_type, uart_int_func_ptr func_ptr) {
 	switch (int_type) {
 		case THRE:
 			UART_SetupCbs(LPC_UART3, 1, func_ptr);
 			break;
 		case RXAV:
-			UART_SetupCbs(LPC_UART3, 0, func_ptr);
+			UART_SetupCbs(LPC_UART3, 0, func_ptr)
 		default:
 			break;
 	}

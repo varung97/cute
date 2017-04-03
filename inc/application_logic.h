@@ -24,7 +24,7 @@
 #include "led7seg_helper.h"
 #include "speaker_helper.h"
 
-typedef enum {PASSIVE, MONITOR} mode_type;
+typedef enum {PASSIVE, MONITOR, MESSAGE} mode_type;
 
 #define LIGHT_LOW_WARNING 50
 #define TEMP_HIGH_WARNING 240

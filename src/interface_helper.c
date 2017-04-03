@@ -72,8 +72,17 @@ void i2c_init(void) {
 }
 
 void gpio_init(void) {
+	// Light interrupt
 	pin_config(0, 0, 2, 2, 5);
 	pin_set_dir(2, 5, 0);
+
+	// SW3
+	pin_config(0, 0, 0, 2, 10);
+	pin_set_dir(2, 10, 0);
+
+	// SW4
+	pin_config(0, 0, 0, 1, 31);
+	pin_set_dir(1, 31, 0);
 }
 
 void uart_init(void) {

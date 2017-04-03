@@ -25,7 +25,7 @@
 #include "led7seg_helper.h"
 #include "speaker_helper.h"
 
-typedef enum {PASSIVE, MONITOR} mode_type;
+typedef enum {PASSIVE, MONITOR, MESSAGE} mode_type;
 
 #define LIGHT_RANGE 973
 #define LIGHT_LOW_WARNING 50
@@ -40,6 +40,7 @@ void loop();
 void eint3_isr();
 void pwm();
 void uart_thre_isr();
+void uart_rxav_isr();
 
 
 #endif /* APPLICATION_LOGIC_H_ */

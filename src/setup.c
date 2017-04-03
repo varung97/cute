@@ -42,6 +42,7 @@ void attach_interrupts() {
 	eint_attach_interrupt(EINT0, toggle_isr);
 	eint_attach_interrupt(EINT3, eint3_isr);
 	uart_attach_interrupt(THRE, uart_thre_isr);
+	uart_attach_interrupt(RXAV, uart_rxav_isr);
 }
 
 void set_interrupt_priorities() {

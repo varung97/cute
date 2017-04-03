@@ -19,15 +19,18 @@ int32_t temp_val;
 uint32_t light_val;
 char str_val[12];
 char uart_str[120];
+char uart_recv[120];
 
 volatile int is_new_second = 0,
-		should_toggle_mode = 0,
+		should_toggle_mode_single = 0,
+		should_toggle_mode_double = 0,
 		is_rgb_leds_on = 0,
 		is_blue_rgb_blinking = 0,
 		is_red_rgb_blinking = 0,
 		pwm_count = 0,
 		pwm_val = 10,
-		uart_should_queue = 0;
+		uart_should_queue = 0,
+		uart_new_data_available = 0;
 
 volatile uint32_t temp_curr_time = 0;
 volatile int should_update_temp = 0, start = 0, end = 0;
@@ -62,8 +65,26 @@ void conditionally_turn_on_blue_and_red_rgbs() {
 	is_red_rgb_blinking  ? rgb_also_set_red()  : rgb_also_clear_red();
 }
 
+void reset_board() {
+	timer_interrupt_disable(TIMER0);
+	timer_interrupt_disable(TIMER1);
+	timer_interrupt_disable(TIMER2);
+
+	eint_interrupt_handler_disable(EINT3);
+
+	led7seg_set_raw(0xFF);
+	acc_setMode(ACC_MODE_STANDBY);
+	light_shutdown();
+	uart_disable();
+	oled_clearScreen(OLED_COLOR_BLACK);
+
+	turn_off_blue_and_red_rgbs();
+}
+
 void enable_monitor_mode() {
 	current_mode = MONITOR;
+
+	reset_board();
 
 	led7seg_display_val = is_blue_rgb_blinking = is_red_rgb_blinking = uart_should_queue = num_transmissions = 0;
 	pwm_val = 10;
@@ -88,31 +109,42 @@ void enable_monitor_mode() {
 void enable_passive_mode() {
 	current_mode = PASSIVE;
 
-	timer_interrupt_disable(TIMER0);
-	timer_interrupt_disable(TIMER1);
-	timer_interrupt_disable(TIMER2);
-
-	eint_interrupt_handler_disable(EINT3);
-
-	led7seg_set_raw(0xFF);
-	acc_setMode(ACC_MODE_STANDBY);
-	light_shutdown();
-	uart_disable();
-	oled_clearScreen(OLED_COLOR_BLACK);
-
-	turn_off_blue_and_red_rgbs();
+	reset_board();
 }
 
-void toggle_mode() {
+void enable_message_mode() {
+	current_mode = MESSAGE;
+
+	reset_board();
+
+	oled_putString(0, 0, (uint8_t *) "MESSAGE", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+}
+
+void toggle_mode_single() {
 	switch (current_mode) {
-	case PASSIVE:
-		enable_monitor_mode();
-		break;
-	case MONITOR:
-		enable_passive_mode();
-		break;
-	default:
-		break;
+		case PASSIVE:
+		case MESSAGE:
+			enable_monitor_mode();
+			break;
+		case MONITOR:
+			enable_passive_mode();
+			break;
+		default:
+			break;
+	}
+}
+
+void toggle_mode_double() {
+	switch (current_mode) {
+		case PASSIVE:
+		case MONITOR:
+			enable_message_mode();
+			break;
+		case MESSAGE:
+			enable_passive_mode();
+			break;
+		default:
+			break;
 	}
 }
 
@@ -143,13 +175,13 @@ void uart_transmit_vals() {
 	sprintf(uart_str,
 			"%s%s%03d_-_T%.1f_L%04d_AX%03d_AY%03d_AZ%03d\r\n",
 			is_red_rgb_blinking  ? "Fire was Detected.\r\n" : "",
-					is_blue_rgb_blinking ? "Movement in darkness was Detected.\r\n" : "",
-							num_transmissions,
-							temp_val / 10.0,
-							(int) light_val,
-							(int) x,
-							(int) y,
-							(int) z
+			is_blue_rgb_blinking ? "Movement in darkness was Detected.\r\n" : "",
+			num_transmissions,
+			temp_val / 10.0,
+			(int) light_val,
+			(int) x,
+			(int) y,
+			(int) z
 	);
 
 	uart_send_notblocking(uart_str);
@@ -192,7 +224,11 @@ void pwm() {
 }
 
 void toggle_isr() {
-	should_toggle_mode = 1;
+	if (pin_read_val(1, 31)) {
+		should_toggle_mode_double = 1;
+	} else {
+		should_toggle_mode_single = 1;
+	}
 }
 
 void do_every_second() {
@@ -219,15 +255,25 @@ void uart_thre_isr() {
 	uart_should_queue = 1;
 }
 
+void uart_rxav_isr() {
+	uart_new_data_available = uart_receive_notblocking(uart_recv);
+}
+
 /**********************************************************
  * Loop
  **********************************************************/
 
 void loop() {
-	if (should_toggle_mode) {
-		should_toggle_mode = 0;
+	if (should_toggle_mode_single) {
+		should_toggle_mode_single = 0;
 
-		toggle_mode();
+		toggle_mode_single();
+	}
+
+	if (should_toggle_mode_double) {
+		should_toggle_mode_double = 0;
+
+		toggle_mode_double();
 	}
 
 	if (is_new_second) {
@@ -246,16 +292,17 @@ void loop() {
 			light_val = light_read();
 			pwm_val = (light_val * 20) / LIGHT_RANGE + 1;
 
-			eint_interrupt_handler_disable(EINT3);
-
 			if (led7seg_display_val == 15) {
 				uart_transmit_vals();
 			}
 
+			eint_interrupt_handler_disable(EINT3);
 			display_values();
-
 			eint_interrupt_handler_enable(EINT3);
 			temp_reset_times();
+
+			current_temp_edges = 0;
+			prev_ms_temp = get_ms_ticks();
 		}
 
 
@@ -272,5 +319,10 @@ void loop() {
 	if (uart_should_queue) {
 		uart_queue_into_fifo();
 		uart_should_queue = 0;
+	}
+
+	if (uart_new_data_available) {
+		uart_new_data_available = 0;
+		oled_putString(0, 0, (uint8_t *) uart_recv, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	}
 }

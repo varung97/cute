@@ -10,6 +10,7 @@
 
 #include "stdio.h"
 #include "stdint.h"
+#include "stdlib.h"
 #include "interface_helper.h"
 #include "timer_helper.h"
 #include "interrupt_helper.h"
@@ -26,8 +27,11 @@
 
 typedef enum {PASSIVE, MONITOR} mode_type;
 
+#define LIGHT_RANGE 973
 #define LIGHT_LOW_WARNING 50
 #define TEMP_HIGH_WARNING 240
+#define ACC_STABLE 50
+#define ACC_THRESHOLD 7
 
 void toggle_leds();
 void do_every_second();

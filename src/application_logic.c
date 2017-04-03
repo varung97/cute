@@ -7,13 +7,12 @@
 
 #include "application_logic.h"
 
-#define LIGHT_RANGE 973
-
 mode_type current_mode = PASSIVE;
 
 int8_t x, y, z;
 uint8_t led7seg_display_val;
 int num_transmissions = 0;
+int did_motion_occur = 0;
 volatile int led = 0;
 
 int32_t temp_val;
@@ -191,7 +190,9 @@ void eint3_isr(void) {
 		// light interrupt
 		gpio_interrupt_clear(2, 5);
 		light_clearIrqStatus();
-		is_blue_rgb_blinking = 1;
+		if(did_motion_occur) {
+			is_blue_rgb_blinking = 1;
+		}
 	}
 	if (did_gpio_interrupt_occur(0, 2)) {
 		gpio_interrupt_clear(0, 2);
@@ -220,8 +221,12 @@ void loop() {
 		led7seg_display_val = led7seg_display_val == 15 ? 0 : led7seg_display_val + 1;
 		led7seg_set_number(led7seg_display_val);
 
+		acc_read(&x, &y, &z);
+
+		did_motion_occur = (abs(x) + abs(y) + abs(z) > ACC_STABLE + ACC_THRESHOLD ||
+		   abs(x) + abs(y) + abs(z) < ACC_STABLE - ACC_THRESHOLD);
+
 		if (should_read_vals()) {
-			acc_read(&x, &y, &z);
 
 			light_val = light_read();
 			pwm_val = (light_val * 20) / LIGHT_RANGE + 1;

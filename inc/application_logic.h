@@ -10,6 +10,9 @@
 
 #include "stdio.h"
 #include "stdint.h"
+#include "monitor.h"
+#include "message.h"
+#include "passive.h"
 #include "interface_helper.h"
 #include "timer_helper.h"
 #include "interrupt_helper.h"
@@ -24,17 +27,12 @@
 #include "led7seg_helper.h"
 #include "speaker_helper.h"
 
-typedef enum {PASSIVE, MONITOR} mode_type;
+typedef enum {PASSIVE, MONITOR, MESSAGE} mode_type;
 
-#define LIGHT_LOW_WARNING 50
-#define TEMP_HIGH_WARNING 240
-
-void toggle_leds();
-void do_every_second();
+void reset_board();
 void toggle_isr();
+void uart_thre_isr();
 void loop();
-void eint3_isr();
-void pwm();
 
 
 #endif /* APPLICATION_LOGIC_H_ */

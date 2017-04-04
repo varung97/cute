@@ -11,6 +11,7 @@ void init_interfaces() {
 	i2c_init();
 	ssp_init();
 	gpio_init();
+	uart_init();
 }
 
 void init_external_peripherals() {
@@ -40,7 +41,11 @@ void attach_interrupts() {
 	timer_attach_interrupt(TIMER2, pwm, 1, 0);
 	eint_attach_interrupt(EINT0, toggle_isr);
 	eint_attach_interrupt(EINT3, eint3_isr);
+	uart_attach_interrupt(THRE, uart_thre_isr);
+	uart_attach_interrupt(RXAV, uart_rxav_isr);
+}
 
+void set_interrupt_priorities() {
 	NVIC_SetPriorityGrouping(4);
 	NVIC_SetPriority(TIMER0_IRQn, 8);
 	NVIC_SetPriority(TIMER1_IRQn, 5);
@@ -48,15 +53,20 @@ void attach_interrupts() {
 	NVIC_SetPriority(EINT0_IRQn, 12);
 	NVIC_SetPriority(EINT3_IRQn, 4);
 	NVIC_SetPriority(SysTick_IRQn, 0);
+	NVIC_SetPriority(UART3_IRQn, 9);
 }
 
 void enable_interrupts() {
+	set_interrupt_priorities();
+
 	eint_interrupt_enable(EINT0, EDGE_TRIGGERED, ACTIVELOW_OR_FALLINGEDGE);
 	eint_interrupt_handler_enable(EINT0);
 	eint_interrupt_enable(EINT3, LEVEL_TRIGGERED, ACTIVELOW_OR_FALLINGEDGE);
 
 	gpio_interrupt_enable(2, 5);
 	gpio_interrupt_enable(0, 2);
+
+	uart_interrupt_enable();
 }
 
 void setup() {

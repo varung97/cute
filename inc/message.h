@@ -10,6 +10,7 @@
 
 #include "stdio.h"
 #include "stdint.h"
+#include "string.h"
 #include "application_logic.h"
 #include "interface_helper.h"
 #include "timer_helper.h"

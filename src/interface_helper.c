@@ -183,6 +183,9 @@ int uart_receive_notblocking(char* bufin) {
 	if (uart_get_from_rbr()) {
 		// Receiving has ended
 		uart_receiving_in_progress = 0;
+
+		// Terminate string instead of \r char
+		(buf - 2)[0] = '\0';
 		return 1;
 	} else {
 		return 0;

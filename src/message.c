@@ -27,30 +27,20 @@ void uart_rxav_isr() {
 	uart_new_data_available = uart_receive_notblocking(uart_recv);
 }
 
-void message_loop() {
-	if (uart_new_data_available) {
-		uart_new_data_available = 0;
-		oled_putString(0, 0, (uint8_t *) uart_recv, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-	}
-
-	// Only do this every 200ms or so??
-	state = joystick_read();
-
-	switch (message_mode) {
-	case VIEW:
-		view_loop();
-		break;
-	case WRITE:
-		write_loop();
-	default:
-		break;
-	}
-}
-
 void view_loop() {
 	// switch to write mode
 	if (state & JOYSTICK_CENTER) {
 
+	}
+}
+
+void display_keyboard() {
+	int i;
+	for (i = 0; i < 15; i++) {
+		oled_putChar(i * 6, 40, 'a' + i, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+	}
+	for (i = 0; i < 11; i++) {
+		oled_putChar(i * 6, 50, 'p' + i, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	}
 }
 
@@ -68,12 +58,22 @@ void write_loop() {
 	}
 }
 
-void display_keyboard() {
-	int i;
-	for (i = 0; i < 15; i++) {
-		oled_putChar(i * 6, 40, 'a' + i, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+void message_loop() {
+	if (uart_new_data_available) {
+		uart_new_data_available = 0;
+		oled_putString(0, 0, (uint8_t *) uart_recv, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	}
-	for (i = 0; i < 11; i++) {
-		oled_putChar(i * 6, 50, 'p' + i, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+
+	// Only do this every 200ms or so??
+	state = joystick_read();
+
+	switch (message_mode) {
+	case VIEW:
+		view_loop();
+		break;
+	case WRITE:
+		write_loop();
+	default:
+		break;
 	}
 }

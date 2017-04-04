@@ -24,6 +24,8 @@
 #include "rgb_helper.h"
 #include "led7seg_helper.h"
 
+typedef enum {VIEW, WRITE} message_mode_type;
+
 void enable_message_mode();
 void uart_rxav_isr();
 void message_loop();

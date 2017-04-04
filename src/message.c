@@ -35,16 +35,33 @@ void message_loop() {
 
 	// Only do this every 200ms or so??
 	state = joystick_read();
-	if (state & JOYSTICK_CENTER) {
-		if (message_mode == VIEW) {
-			// switch to write mode
-		} else {
-			// select something on the write screen
-		}
+
+	switch (message_mode) {
+	case VIEW:
+		view_loop();
+		break;
+	case WRITE:
+		write_loop();
+	default:
+		break;
 	}
-	if (state & JOYSTICK_DOWN) {
-		if (message_mode == WRITE) {
-			// move down, only if possible
-		}
+}
+
+void view_loop() {
+	// switch to write mode
+	if (state & JOYSTICK_CENTER) {
+
+	}
+}
+
+void write_loop() {
+	// select something on the write screen
+	if (state & JOYSTICK_CENTER) {
+	}
+	else if (state & JOYSTICK_LEFT) {
+	}
+	else if (state & JOYSTICK_RIGHT) {
+	}
+	else if (state & JOYSTICK_DOWN) {
 	}
 }

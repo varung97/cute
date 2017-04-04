@@ -10,7 +10,9 @@
 
 #include "stdio.h"
 #include "stdint.h"
-#include "stdlib.h"
+#include "monitor.h"
+#include "message.h"
+#include "passive.h"
 #include "interface_helper.h"
 #include "timer_helper.h"
 #include "interrupt_helper.h"
@@ -27,20 +29,10 @@
 
 typedef enum {PASSIVE, MONITOR, MESSAGE} mode_type;
 
-#define LIGHT_RANGE 973
-#define LIGHT_LOW_WARNING 50
-#define TEMP_HIGH_WARNING 240
-#define ACC_STABLE 50
-#define ACC_THRESHOLD 7
-
-void toggle_leds();
-void do_every_second();
+void reset_board();
 void toggle_isr();
-void loop();
-void eint3_isr();
-void pwm();
 void uart_thre_isr();
-void uart_rxav_isr();
+void loop();
 
 
 #endif /* APPLICATION_LOGIC_H_ */

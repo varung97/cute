@@ -28,6 +28,8 @@ void uart_init();
 void uart_enable();
 void uart_disable();
 void uart_interrupt_enable();
+void uart_interrupt_disable();
+void uart_specific_interrupt_cmd(uart_int_type int_type, FunctionalState command);
 void uart_send(char str[]);
 void uart_send_notblocking(char str[]);
 int uart_receive_notblocking(char* bufin);

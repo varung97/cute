@@ -116,9 +116,23 @@ void uart_disable(void) {
 
 void uart_interrupt_enable() {
 	NVIC_EnableIRQ(UART3_IRQn);
+}
 
-	// TODO: Move into messaging mode
-	UART_IntConfig(LPC_UART3, UART_INTCFG_RBR, ENABLE);
+void uart_interrupt_disable() {
+	NVIC_DisableIRQ(UART3_IRQn);
+}
+
+void uart_specific_interrupt_cmd(uart_int_type int_type, FunctionalState command) {
+	switch (int_type) {
+		case THRE:
+			UART_IntConfig(LPC_UART3, UART_INTCFG_THRE, command);
+			break;
+		case RXAV:
+			UART_IntConfig(LPC_UART3, UART_INTCFG_RBR, command);
+			break;
+		default:
+			break;
+	}
 }
 
 void uart_send(char str[]) {
@@ -136,7 +150,7 @@ void uart_send_notblocking(char str[]) {
 	to_send = str;
 	amt_left = strlen(str);
 
-	UART_IntConfig(LPC_UART3, UART_INTCFG_THRE, ENABLE);
+	uart_specific_interrupt_cmd(THRE, ENABLE);
 }
 
 void uart_queue_into_fifo() {
@@ -144,7 +158,7 @@ void uart_queue_into_fifo() {
 
 	amt_left -= UART_TX_FIFO_SIZE;
 	if (amt_left <= 0) {
-		UART_IntConfig(LPC_UART3, UART_INTCFG_THRE, DISABLE);
+		uart_specific_interrupt_cmd(THRE, DISABLE);
 	} else {
 		to_send += UART_TX_FIFO_SIZE;
 	}
@@ -155,7 +169,7 @@ int uart_get_from_rbr() {
 	uint32_t amt_just_recv = UART_Receive(LPC_UART3, (uint8_t *) buf, 16, NONE_BLOCKING);
 	amt_recv += amt_just_recv;
 	buf += amt_just_recv;
-	return (buf - 1)[0] == '\r';
+	return (buf - 1)[0] == '\n';
 }
 
 // Returns whether terminating character was received

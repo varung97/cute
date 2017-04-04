@@ -55,6 +55,8 @@ void view_loop() {
 }
 
 void write_loop() {
+	display_keyboard();
+
 	// select something on the write screen
 	if (state & JOYSTICK_CENTER) {
 	}
@@ -63,5 +65,15 @@ void write_loop() {
 	else if (state & JOYSTICK_RIGHT) {
 	}
 	else if (state & JOYSTICK_DOWN) {
+	}
+}
+
+void display_keyboard() {
+	int i;
+	for (i = 0; i < 15; i++) {
+		oled_putChar(i * 6, 40, 'a' + i, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+	}
+	for (i = 0; i < 11; i++) {
+		oled_putChar(i * 6, 50, 'p' + i, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	}
 }

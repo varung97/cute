@@ -150,6 +150,9 @@ void outgoing_message_send() {
 	outgoing_message[len + 1] = '\n';
 	outgoing_message[len + 2] = '\0';
 	uart_send_notblocking(outgoing_message);
+
+	timer_interrupt_enable(TIMER1);
+	timer_interrupt_enable(TIMER2);
 }
 
 void enable_write_mode() {
@@ -159,6 +162,7 @@ void enable_write_mode() {
 }
 
 void write_loop() {
+
 	if (state & JOYSTICK_CENTER) {
 		if (curr_char == 29) {
 			// Send

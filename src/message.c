@@ -11,7 +11,7 @@ void display_keyboard();
 void write_loop();
 
 char incoming_message[INCOMING_MAX_LEN];
-char outgoing_message[OUTGOING_MAX_LEN + 1]; // For terminating character
+char outgoing_message[OUTGOING_MAX_LEN + 3]; // For terminating character and CRLF
 volatile int uart_new_data_available = 0;
 message_mode_type message_mode = WRITE;
 uint8_t state;
@@ -19,6 +19,14 @@ volatile int led1 = 0;
 volatile int should_read_joystick = 0;
 int curr_dash_start_x = 0, curr_dash_end_x = 5, curr_dash_y = 48;
 int prev_dash_start_x = 0, prev_dash_end_x = 5, prev_dash_y = 48;
+int curr_char = 0;
+
+
+/**********************************************************
+ * Required function headers
+ ***********************************************************/
+
+void enable_write_mode();
 
 
 /**********************************************************
@@ -37,6 +45,14 @@ void read_joystick_isr() {
 /**********************************************************
  * Common helper functions
  ***********************************************************/
+
+void reset_write_mode() {
+	outgoing_message[0] = '\0';
+	curr_char = 0;
+	curr_dash_start_x = 0;
+	curr_dash_end_x = 5;
+	curr_dash_y = 48;
+}
 
 
 /**********************************************************
@@ -57,6 +73,8 @@ void display_incoming_message() {
 }
 
 void enable_view_mode() {
+	message_mode = VIEW;
+	reset_write_mode();
 	display_incoming_message();
 }
 
@@ -69,7 +87,6 @@ void view_loop() {
 
 	// switch to write mode
 	if (state & JOYSTICK_CENTER) {
-		message_mode = WRITE;
 		enable_write_mode();
 	}
 }
@@ -103,7 +120,9 @@ void outgoing_add_char(char chr) {
 	outgoing_message[len] = chr;
 	outgoing_message[len + 1] = '\0';
 
-	oled_putChar(len % 15, len / 15, chr, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+	int col = len % 15;
+	int row = len / 15;
+	oled_putChar(col * CHARACTER_WIDTH, row * ROW_HEIGHT, chr, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 }
 
 void outgoing_del_char() {
@@ -111,27 +130,49 @@ void outgoing_del_char() {
 	if (len == 0) return;
 
 	outgoing_message[len - 1] = '\0';
-	oled_putChar((len - 1) % 15, (len - 1) / 15, ' ', OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+
+	int col = (len - 1) % 15;
+	int row = (len - 1) / 15;
+	oled_putChar(col * CHARACTER_WIDTH, row * ROW_HEIGHT, ' ', OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 }
 
-void send_outgoing_message() {
+void outgoing_message_send() {
+	int len = strlen(outgoing_message);
+	if (len == 0) return;
+
+	outgoing_message[len] = '\r';
+	outgoing_message[len + 1] = '\n';
+	outgoing_message[len + 2] = '\0';
 	uart_send_notblocking(outgoing_message);
 }
 
 void enable_write_mode() {
+	message_mode = WRITE;
 	display_keyboard();
 }
 
 void write_loop() {
 	if (state & JOYSTICK_CENTER) {
-		if(curr_dash_start_x == 78 && curr_dash_y == SECONDLINE_DASH_Y) {
-			message_mode = VIEW;
+		if (curr_char == 29) {
+			// Send
+			outgoing_message_send();
 			enable_view_mode();
+		} else if (curr_char == 28) {
+			// Cancel
+			enable_view_mode();
+		} else if (curr_char == 27) {
+			// Backspace
+			outgoing_del_char();
+		} else if (curr_char == 26) {
+			// Space
+			outgoing_add_char(' ');
+		} else {
+			outgoing_add_char('a' + curr_char);
 		}
 	}
 
 	if (state & JOYSTICK_LEFT) {
-		if(curr_dash_start_x > OLED_LEFT_BOUND) {
+		if (curr_dash_start_x > OLED_LEFT_BOUND) {
 			oled_line(prev_dash_start_x, prev_dash_y, prev_dash_end_x, prev_dash_y, OLED_COLOR_BLACK);
 
 			curr_dash_end_x = prev_dash_start_x - 1;
@@ -143,11 +184,13 @@ void write_loop() {
 			prev_dash_start_x = curr_dash_start_x;
 			prev_dash_end_x = curr_dash_end_x;
 			prev_dash_y = curr_dash_y;
+
+			curr_char--;
 		}
 	}
 
 	if (state & JOYSTICK_RIGHT) {
-		if(curr_dash_start_x < OLED_RIGHT_BOUND) {
+		if (curr_dash_start_x < OLED_RIGHT_BOUND) {
 			oled_line(prev_dash_start_x, prev_dash_y, prev_dash_end_x, prev_dash_y, OLED_COLOR_BLACK);
 
 			curr_dash_start_x = prev_dash_end_x + 1;
@@ -159,11 +202,13 @@ void write_loop() {
 			prev_dash_start_x = curr_dash_start_x;
 			prev_dash_end_x = curr_dash_end_x;
 			prev_dash_y = curr_dash_y;
+
+			curr_char++;
 		}
 	}
 
 	if (state & JOYSTICK_DOWN) {
-		if(curr_dash_y == FIRSTLINE_DASH_Y) {
+		if (curr_dash_y == FIRSTLINE_DASH_Y) {
 			oled_line(prev_dash_start_x, prev_dash_y, prev_dash_end_x, prev_dash_y, OLED_COLOR_BLACK);
 
 			curr_dash_start_x = prev_dash_start_x;
@@ -175,11 +220,13 @@ void write_loop() {
 			prev_dash_start_x = curr_dash_start_x;
 			prev_dash_end_x = curr_dash_end_x;
 			prev_dash_y = curr_dash_y;
+
+			curr_char += 15;
 		}
 	}
 
 	if (state & JOYSTICK_UP) {
-		if(curr_dash_y == SECONDLINE_DASH_Y) {
+		if (curr_dash_y == SECONDLINE_DASH_Y) {
 			oled_line(prev_dash_start_x, prev_dash_y, prev_dash_end_x, prev_dash_y, OLED_COLOR_BLACK);
 
 			curr_dash_start_x = prev_dash_start_x;
@@ -191,6 +238,8 @@ void write_loop() {
 			prev_dash_start_x = curr_dash_start_x;
 			prev_dash_end_x = curr_dash_end_x;
 			prev_dash_y = curr_dash_y;
+
+			curr_char -= 15;
 		}
 	}
 }
@@ -203,7 +252,6 @@ void write_loop() {
 void enable_message_mode() {
 	reset_board();
 
-	message_mode = VIEW;
 	enable_view_mode();
 
 	timer_interrupt_enable(TIMER3);

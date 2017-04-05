@@ -79,32 +79,32 @@ void display_keyboard() {
 
 	int i;
 	for (i = 0; i < 15; i++) {
-		oled_putChar(i * 6, 40, 'a' + i, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+		oled_putChar(i * CHARACTER_WIDTH, FIRST_KEYBOARD_COLUMN, 'a' + i, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	}
 	for (i = 0; i < 11; i++) {
-		oled_putChar(i * 6, 50, 'p' + i, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+		oled_putChar(i * CHARACTER_WIDTH, SECOND_KEYBOARD_COLUMN, 'p' + i, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	}
-	oled_putChar(68, 50, '.', OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-	oled_putChar(72, 50, 0x80, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-	oled_putChar(80, 50, 'X', OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-	oled_putChar(86, 50, 0x81, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+	oled_putChar(68, SECOND_KEYBOARD_COLUMN, '.', OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+	oled_putChar(72, SECOND_KEYBOARD_COLUMN, 0x80, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+	oled_putChar(80, SECOND_KEYBOARD_COLUMN, 'X', OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+	oled_putChar(86, SECOND_KEYBOARD_COLUMN, 0x81, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_WHITE);
 }
 
 void write_loop() {
 	if (state & JOYSTICK_CENTER) {
-		if(curr_dash_start_x == 78 && curr_dash_y == 58) {
+		if(curr_dash_start_x == 78 && curr_dash_y == SECONDLINE_DASH_Y) {
 			message_mode = VIEW;
 			enable_view_mode();
 		}
 	}
 
 	if (state & JOYSTICK_LEFT) {
-		if(curr_dash_start_x > 0) {
+		if(curr_dash_start_x > OLED_LEFT_BOUND) {
 			oled_line(prev_dash_start_x, prev_dash_y, prev_dash_end_x, prev_dash_y, OLED_COLOR_BLACK);
 
 			curr_dash_end_x = prev_dash_start_x - 1;
-			curr_dash_start_x = curr_dash_end_x - 5;
+			curr_dash_start_x = curr_dash_end_x - DASH_WIDTH;
 			curr_dash_y = prev_dash_y;
 
 			oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_WHITE);
@@ -116,11 +116,11 @@ void write_loop() {
 	}
 
 	if (state & JOYSTICK_RIGHT) {
-		if(curr_dash_start_x < 84) {
+		if(curr_dash_start_x < OLED_RIGHT_BOUND) {
 			oled_line(prev_dash_start_x, prev_dash_y, prev_dash_end_x, prev_dash_y, OLED_COLOR_BLACK);
 
 			curr_dash_start_x = prev_dash_end_x + 1;
-			curr_dash_end_x = curr_dash_start_x + 5;
+			curr_dash_end_x = curr_dash_start_x + DASH_WIDTH;
 			curr_dash_y = prev_dash_y;
 
 			oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_WHITE);
@@ -132,12 +132,12 @@ void write_loop() {
 	}
 
 	if (state & JOYSTICK_DOWN) {
-		if(curr_dash_y == 48) {
+		if(curr_dash_y == FIRSTLINE_DASH_Y) {
 			oled_line(prev_dash_start_x, prev_dash_y, prev_dash_end_x, prev_dash_y, OLED_COLOR_BLACK);
 
 			curr_dash_start_x = prev_dash_start_x;
 			curr_dash_end_x = prev_dash_end_x;
-			curr_dash_y = prev_dash_y + 10;
+			curr_dash_y = prev_dash_y + ROW_HEIGHT;
 
 			oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_WHITE);
 
@@ -148,12 +148,12 @@ void write_loop() {
 	}
 
 	if (state & JOYSTICK_UP) {
-		if(curr_dash_y == 58) {
+		if(curr_dash_y == SECONDLINE_DASH_Y) {
 			oled_line(prev_dash_start_x, prev_dash_y, prev_dash_end_x, prev_dash_y, OLED_COLOR_BLACK);
 
 			curr_dash_start_x = prev_dash_start_x;
 			curr_dash_end_x = prev_dash_end_x;
-			curr_dash_y = prev_dash_y - 10;
+			curr_dash_y = prev_dash_y - ROW_HEIGHT;
 
 			oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_WHITE);
 

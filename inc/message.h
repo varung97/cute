@@ -27,6 +27,15 @@
 
 #define OUTGOING_MAX_LEN 40
 #define INCOMING_MAX_LEN 80
+#define ROW_HEIGHT 10
+#define CHARACTER_WIDTH 6
+#define FIRST_KEYBOARD_COLUMN 40
+#define SECOND_KEYBOARD_COLUMN 50
+#define DASH_WIDTH 5
+#define FIRSTLINE_DASH_Y 48
+#define SECONDLINE_DASH_Y 58
+#define OLED_LEFT_BOUND 0
+#define OLED_RIGHT_BOUND 84
 
 typedef enum {VIEW, WRITE} message_mode_type;
 

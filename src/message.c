@@ -17,7 +17,6 @@ uint8_t state;
 volatile int led1 = 0;
 volatile int should_read_joystick = 0;
 int curr_dash_start_x = 0, curr_dash_end_x = 5, curr_dash_y = 48;
-int prev_dash_start_x = 0, prev_dash_end_x = 5, prev_dash_y = 48;
 
 void uart_rxav_isr() {
 	uart_new_data_available = uart_receive_notblocking(incoming_message);
@@ -87,7 +86,7 @@ void display_keyboard() {
 	oled_putChar(66, SECOND_KEYBOARD_COLUMN, 0x82, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	oled_putChar(72, SECOND_KEYBOARD_COLUMN, 0x80, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	oled_putChar(79, SECOND_KEYBOARD_COLUMN, 'X', OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-	oled_putChar(85, SECOND_KEYBOARD_COLUMN, 0x81, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+	oled_putChar(86, SECOND_KEYBOARD_COLUMN, 0x81, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_WHITE);
 }
 
@@ -101,65 +100,43 @@ void write_loop() {
 
 	if (state & JOYSTICK_LEFT) {
 		if(curr_dash_start_x > OLED_LEFT_BOUND) {
-			oled_line(prev_dash_start_x, prev_dash_y, prev_dash_end_x, prev_dash_y, OLED_COLOR_BLACK);
+			oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_BLACK);
 
-			curr_dash_end_x = prev_dash_start_x - 1;
+			curr_dash_end_x = curr_dash_start_x - 1;
 			curr_dash_start_x = curr_dash_end_x - DASH_WIDTH;
-			curr_dash_y = prev_dash_y;
 
 			oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_WHITE);
-
-			prev_dash_start_x = curr_dash_start_x;
-			prev_dash_end_x = curr_dash_end_x;
-			prev_dash_y = curr_dash_y;
 		}
 	}
 
 	if (state & JOYSTICK_RIGHT) {
 		if(curr_dash_start_x < OLED_RIGHT_BOUND) {
-			oled_line(prev_dash_start_x, prev_dash_y, prev_dash_end_x, prev_dash_y, OLED_COLOR_BLACK);
+			oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_BLACK);
 
-			curr_dash_start_x = prev_dash_end_x + 1;
+			curr_dash_start_x = curr_dash_end_x + 1;
 			curr_dash_end_x = curr_dash_start_x + DASH_WIDTH;
-			curr_dash_y = prev_dash_y;
 
 			oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_WHITE);
-
-			prev_dash_start_x = curr_dash_start_x;
-			prev_dash_end_x = curr_dash_end_x;
-			prev_dash_y = curr_dash_y;
 		}
 	}
 
 	if (state & JOYSTICK_DOWN) {
 		if(curr_dash_y == FIRSTLINE_DASH_Y) {
-			oled_line(prev_dash_start_x, prev_dash_y, prev_dash_end_x, prev_dash_y, OLED_COLOR_BLACK);
+			oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_BLACK);
 
-			curr_dash_start_x = prev_dash_start_x;
-			curr_dash_end_x = prev_dash_end_x;
-			curr_dash_y = prev_dash_y + ROW_HEIGHT;
+			curr_dash_y += ROW_HEIGHT;
 
 			oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_WHITE);
-
-			prev_dash_start_x = curr_dash_start_x;
-			prev_dash_end_x = curr_dash_end_x;
-			prev_dash_y = curr_dash_y;
 		}
 	}
 
 	if (state & JOYSTICK_UP) {
 		if(curr_dash_y == SECONDLINE_DASH_Y) {
-			oled_line(prev_dash_start_x, prev_dash_y, prev_dash_end_x, prev_dash_y, OLED_COLOR_BLACK);
+			oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_BLACK);
 
-			curr_dash_start_x = prev_dash_start_x;
-			curr_dash_end_x = prev_dash_end_x;
-			curr_dash_y = prev_dash_y - ROW_HEIGHT;
+			curr_dash_y -= ROW_HEIGHT;
 
 			oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_WHITE);
-
-			prev_dash_start_x = curr_dash_start_x;
-			prev_dash_end_x = curr_dash_end_x;
-			prev_dash_y = curr_dash_y;
 		}
 	}
 }

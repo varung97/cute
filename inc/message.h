@@ -25,6 +25,8 @@
 #include "rgb_helper.h"
 #include "led7seg_helper.h"
 
+#define OUTGOING_MAX_LEN 40
+#define INCOMING_MAX_LEN 80
 #define ROW_HEIGHT 10
 #define CHARACTER_WIDTH 6
 #define FIRST_KEYBOARD_COLUMN 40

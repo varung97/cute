@@ -70,7 +70,7 @@ void enable_monitor_mode() {
 	acc_setMode(ACC_MODE_MEASURE);
 	light_enable();
 	uart_enable();
-	oled_putString(0, 0, (uint8_t *) "MONITOR", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+	oled_putString(0, 0, (uint8_t *) "    MONITOR", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
 	light_clearIrqStatus();
 	gpio_interrupt_clear(2, 5);

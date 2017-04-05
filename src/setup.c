@@ -33,6 +33,7 @@ void init_interrupts() {
 	timer_interrupt_setup(TIMER0, 1000);
 	timer_interrupt_setup(TIMER1, 1000);
 	timer_interrupt_setup(TIMER2, 500);
+	timer_interrupt_setup(TIMER3, 1000);
 	systick_interrupt_init();
 }
 
@@ -40,6 +41,7 @@ void attach_interrupts() {
 	timer_attach_interrupt(TIMER0, toggle_leds, 333, 0);
 	timer_attach_interrupt(TIMER1, do_every_second, 1000, 0);
 	timer_attach_interrupt(TIMER2, pwm, 1, 0);
+	timer_attach_interrupt(TIMER3, read_joystick_isr, 100, 0);
 	eint_attach_interrupt(EINT0, toggle_isr);
 	eint_attach_interrupt(EINT3, eint3_isr);
 	uart_attach_interrupt(THRE, uart_thre_isr);
@@ -51,6 +53,7 @@ void set_interrupt_priorities() {
 	NVIC_SetPriority(TIMER0_IRQn, 8);
 	NVIC_SetPriority(TIMER1_IRQn, 5);
 	NVIC_SetPriority(TIMER2_IRQn, 1);
+	NVIC_SetPriority(TIMER3_IRQn, 2);
 	NVIC_SetPriority(EINT0_IRQn, 12);
 	NVIC_SetPriority(EINT3_IRQn, 4);
 	NVIC_SetPriority(SysTick_IRQn, 0);

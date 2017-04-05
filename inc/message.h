@@ -29,6 +29,7 @@ typedef enum {VIEW, WRITE} message_mode_type;
 
 void enable_message_mode();
 void uart_rxav_isr();
+void read_joystick_isr();
 void message_loop();
 
 #endif /* MESSAGE_H_ */

@@ -25,6 +25,9 @@
 #include "rgb_helper.h"
 #include "led7seg_helper.h"
 
+#define OUTGOING_MAX_LEN 40
+#define INCOMING_MAX_LEN 80
+
 typedef enum {VIEW, WRITE} message_mode_type;
 
 void enable_message_mode();

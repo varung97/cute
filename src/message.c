@@ -10,7 +10,8 @@
 void display_keyboard();
 void write_loop();
 
-char incoming_message[80];
+char incoming_message[INCOMING_MAX_LEN];
+char outgoing_message[OUTGOING_MAX_LEN + 1]; // For terminating character
 volatile int uart_new_data_available = 0;
 message_mode_type message_mode = WRITE;
 uint8_t state;
@@ -19,6 +20,11 @@ volatile int should_read_joystick = 0;
 int curr_dash_start_x = 0, curr_dash_end_x = 5, curr_dash_y = 48;
 int prev_dash_start_x = 0, prev_dash_end_x = 5, prev_dash_y = 48;
 
+
+/**********************************************************
+ * ISRs
+ ***********************************************************/
+
 void uart_rxav_isr() {
 	uart_new_data_available = uart_receive_notblocking(incoming_message);
 }
@@ -26,6 +32,16 @@ void uart_rxav_isr() {
 void read_joystick_isr() {
 	should_read_joystick = 1;
 }
+
+
+/**********************************************************
+ * Common helper functions
+ ***********************************************************/
+
+
+/**********************************************************
+ * View mode functions
+ ***********************************************************/
 
 void display_incoming_message() {
 	oled_clearScreen(OLED_COLOR_BLACK);
@@ -44,22 +60,6 @@ void enable_view_mode() {
 	display_incoming_message();
 }
 
-void enable_write_mode() {
-	display_keyboard();
-}
-
-void enable_message_mode() {
-	reset_board();
-
-	message_mode = VIEW;
-	enable_view_mode();
-
-	timer_interrupt_enable(TIMER3);
-
-	uart_enable();
-	uart_specific_interrupt_cmd(RXAV, ENABLE);
-}
-
 void view_loop() {
 	if (uart_new_data_available) {
 		uart_new_data_available = 0;
@@ -73,6 +73,11 @@ void view_loop() {
 		enable_write_mode();
 	}
 }
+
+
+/**********************************************************
+ * Write mode functions
+ ***********************************************************/
 
 void display_keyboard() {
 	oled_clearScreen(OLED_COLOR_BLACK);
@@ -89,6 +94,32 @@ void display_keyboard() {
 	oled_putChar(80, 50, 'X', OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	oled_putChar(86, 50, 0x81, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 	oled_line(curr_dash_start_x, curr_dash_y, curr_dash_end_x, curr_dash_y, OLED_COLOR_WHITE);
+}
+
+void outgoing_add_char(char chr) {
+	int len = strlen(outgoing_message);
+	if (len == OUTGOING_MAX_LEN) return;
+
+	outgoing_message[len] = chr;
+	outgoing_message[len + 1] = '\0';
+
+	oled_putChar(len % 15, len / 15, chr, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+}
+
+void outgoing_del_char() {
+	int len = strlen(outgoing_message);
+	if (len == 0) return;
+
+	outgoing_message[len - 1] = '\0';
+	oled_putChar((len - 1) % 15, (len - 1) / 15, ' ', OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+}
+
+void send_outgoing_message() {
+	uart_send_notblocking(outgoing_message);
+}
+
+void enable_write_mode() {
+	display_keyboard();
 }
 
 void write_loop() {
@@ -162,6 +193,23 @@ void write_loop() {
 			prev_dash_y = curr_dash_y;
 		}
 	}
+}
+
+
+/**********************************************************
+ * Message mode functions
+ ***********************************************************/
+
+void enable_message_mode() {
+	reset_board();
+
+	message_mode = VIEW;
+	enable_view_mode();
+
+	timer_interrupt_enable(TIMER3);
+
+	uart_enable();
+	uart_specific_interrupt_cmd(RXAV, ENABLE);
 }
 
 void message_loop() {

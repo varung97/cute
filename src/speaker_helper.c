@@ -30,13 +30,14 @@ void speaker_toggle() {
 	} else {
 		speaker_on();
 	}
-	is_speaker_on = !is_speaker_on;
 }
 
 void speaker_on() {
+	is_speaker_on = 1;
 	pin_set_val(0, 26);
 }
 
 void speaker_off() {
+	is_speaker_on = 0;
 	pin_clear_val(0, 26);
 }

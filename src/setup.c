@@ -22,6 +22,7 @@ void init_external_peripherals() {
 	oled_init();
 	led7seg_init();
 	joystick_init();
+	speaker_init();
 
 	acc_setMode(ACC_MODE_STANDBY);
 	acc_setRange(ACC_RANGE_4G);
@@ -39,8 +40,6 @@ void init_interrupts() {
 
 void attach_interrupts() {
 	timer_attach_interrupt(TIMER0, toggle_leds, 333, 0);
-	timer_attach_interrupt(TIMER1, do_every_second, 1000, 0);
-	timer_attach_interrupt(TIMER2, pwm, 1, 0);
 	timer_attach_interrupt(TIMER3, read_joystick_isr, 150, 0);
 	eint_attach_interrupt(EINT0, toggle_isr);
 	eint_attach_interrupt(EINT3, eint3_isr);

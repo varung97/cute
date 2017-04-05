@@ -15,8 +15,7 @@ char outgoing_message[OUTGOING_MAX_LEN + 3]; // For terminating character and CR
 volatile int uart_new_data_available = 0;
 message_mode_type message_mode = WRITE;
 uint8_t state;
-volatile int led1 = 0;
-volatile int should_read_joystick = 0;
+volatile int should_read_joystick = 0, is_speaker_on = 0;
 int curr_dash_start_x = 0, curr_dash_end_x = 5, curr_dash_y = 48;
 int curr_char = 0;
 
@@ -34,10 +33,19 @@ void enable_write_mode();
 
 void uart_rxav_isr() {
 	uart_new_data_available = uart_receive_notblocking(incoming_message);
+	if (uart_new_data_available) {
+		timer_interrupt_enable(TIMER1);
+		timer_interrupt_enable(TIMER2);
+	}
 }
 
 void read_joystick_isr() {
 	should_read_joystick = 1;
+}
+
+void turn_speaker_off() {
+	timer_interrupt_disable(TIMER2);
+	speaker_off();
 }
 
 
@@ -231,6 +239,8 @@ void enable_message_mode() {
 
 	enable_view_mode();
 
+	timer_attach_interrupt(TIMER1, turn_speaker_off, 200, 1);
+	timer_attach_interrupt(TIMER2, speaker_toggle, 1, 0);
 	timer_interrupt_enable(TIMER3);
 
 	uart_enable();

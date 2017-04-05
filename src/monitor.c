@@ -76,6 +76,8 @@ void enable_monitor_mode() {
 	gpio_interrupt_clear(2, 5);
 	gpio_interrupt_clear(0, 2);
 
+	timer_attach_interrupt(TIMER1, do_every_second, 1000, 0);
+	timer_attach_interrupt(TIMER2, pwm, 1, 0);
 	timer_interrupt_enable(TIMER0);
 	timer_interrupt_enable(TIMER1);
 

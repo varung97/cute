@@ -24,6 +24,7 @@
 #include "oled.h"
 #include "rgb_helper.h"
 #include "led7seg_helper.h"
+#include "speaker_helper.h"
 
 #define OUTGOING_MAX_LEN 40
 #define INCOMING_MAX_LEN 80

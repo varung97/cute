@@ -26,6 +26,7 @@ void reset_board() {
 
 	uart_specific_interrupt_cmd(THRE, DISABLE);
 	uart_specific_interrupt_cmd(RXAV, DISABLE);
+	uart_interrupt_disable();
 
 	led7seg_set_raw(0xFF);
 	acc_setMode(ACC_MODE_STANDBY);

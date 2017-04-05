@@ -79,8 +79,12 @@ void enable_monitor_mode() {
 	timer_interrupt_enable(TIMER0);
 	timer_interrupt_enable(TIMER1);
 
+	uart_interrupt_enable();
+
 	eint_interrupt_handler_enable(EINT3);
 	temp_reset_times();
+
+	uart_send_notblocking("Entering Monitor Mode\r\n");
 }
 
 void display_values() {

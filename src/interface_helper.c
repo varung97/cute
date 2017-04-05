@@ -96,9 +96,7 @@ void uart_init(void) {
 	uartCfg.Stopbits = UART_STOPBIT_1;
 
 	UART_Init(LPC_UART3, &uartCfg);
-}
 
-void uart_enable(void) {
 	UART_SendData(LPC_UART3, 0);
 	UART_SendData(LPC_UART3, 0);
 
@@ -106,7 +104,9 @@ void uart_enable(void) {
 	UART_FIFOConfigStructInit(&fifoCfg);
 	fifoCfg.FIFO_Level = UART_FIFO_TRGLEV3;
 	UART_FIFOConfig(LPC_UART3, &fifoCfg);
+}
 
+void uart_enable(void) {
 	UART_TxCmd(LPC_UART3, ENABLE);
 }
 
@@ -123,6 +123,7 @@ void uart_interrupt_disable() {
 }
 
 void uart_specific_interrupt_cmd(uart_int_type int_type, FunctionalState command) {
+	NVIC_ClearPendingIRQ(UART3_IRQn);
 	switch (int_type) {
 		case THRE:
 			UART_IntConfig(LPC_UART3, UART_INTCFG_THRE, command);

@@ -41,7 +41,7 @@ void attach_interrupts() {
 	timer_attach_interrupt(TIMER0, toggle_leds, 333, 0);
 	timer_attach_interrupt(TIMER1, do_every_second, 1000, 0);
 	timer_attach_interrupt(TIMER2, pwm, 1, 0);
-	timer_attach_interrupt(TIMER3, read_joystick_isr, 100, 0);
+	timer_attach_interrupt(TIMER3, read_joystick_isr, 150, 0);
 	eint_attach_interrupt(EINT0, toggle_isr);
 	eint_attach_interrupt(EINT3, eint3_isr);
 	uart_attach_interrupt(THRE, uart_thre_isr);
@@ -69,8 +69,6 @@ void enable_interrupts() {
 
 	gpio_interrupt_enable(2, 5);
 	gpio_interrupt_enable(0, 2);
-
-	uart_interrupt_enable();
 }
 
 void setup() {

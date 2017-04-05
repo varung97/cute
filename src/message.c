@@ -73,7 +73,6 @@ void display_incoming_message() {
 
 void enable_view_mode() {
 	message_mode = VIEW;
-	reset_write_mode();
 	display_incoming_message();
 }
 
@@ -147,6 +146,7 @@ void outgoing_message_send() {
 
 void enable_write_mode() {
 	message_mode = WRITE;
+	reset_write_mode();
 	display_keyboard();
 }
 
@@ -235,6 +235,7 @@ void enable_message_mode() {
 
 	uart_enable();
 	uart_specific_interrupt_cmd(RXAV, ENABLE);
+	uart_interrupt_enable();
 }
 
 void message_loop() {

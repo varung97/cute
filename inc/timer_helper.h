@@ -23,7 +23,7 @@ void systick_interrupt_init();
 void timer_interrupt_setup(uint8_t timer_num, uint32_t us);
 void timer_attach_interrupt(uint8_t timer_num, timer_func_ptr timer_func, uint32_t num_cycles_to_interrupt, uint8_t should_stop);
 void timer_interrupt_enable(uint8_t timer_num);
-void timer_interrupt_disable(uint8_t timer);
+void timer_interrupt_disable(uint8_t timer_num);
 uint32_t get_ms_ticks(void);
 
 #endif

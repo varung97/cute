@@ -21,6 +21,7 @@ void reset_board() {
 	timer_interrupt_disable(TIMER0);
 	timer_interrupt_disable(TIMER1);
 	timer_interrupt_disable(TIMER2);
+	timer_interrupt_disable(TIMER3);
 
 	eint_interrupt_handler_disable(EINT3);
 
@@ -32,6 +33,8 @@ void reset_board() {
 	acc_setMode(ACC_MODE_STANDBY);
 	light_shutdown();
 	uart_disable();
+	speaker_off();
+	speaker_deinit();
 	oled_clearScreen(OLED_COLOR_BLACK);
 	uart_should_queue = 0;
 

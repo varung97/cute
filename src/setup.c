@@ -22,7 +22,6 @@ void init_external_peripherals() {
 	oled_init();
 	led7seg_init();
 	joystick_init();
-	speaker_init();
 
 	acc_setMode(ACC_MODE_STANDBY);
 	acc_setRange(ACC_RANGE_4G);

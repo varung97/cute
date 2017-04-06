@@ -7,7 +7,7 @@
 
 #include "speaker_helper.h"
 
-uint8_t is_speaker_on;
+volatile uint8_t is_speaker_on;
 
 void speaker_init() {
 	pin_set_dir(0, 27, 1);
@@ -22,6 +22,17 @@ void speaker_init() {
 	pin_clear_val(2, 13); //LM4811-shutdn
 
 	is_speaker_on = 0;
+}
+
+void speaker_deinit() {
+	speaker_off();
+	pin_set_val(0, 27); //LM4811-clk
+	pin_set_val(0, 28); //LM4811-up/dn
+	pin_set_val(2, 13); //LM4811-shutdn
+
+	pin_set_dir(0, 27, 0);
+	pin_set_dir(0, 28, 0);
+	pin_set_dir(2, 13, 0);
 }
 
 void speaker_toggle() {

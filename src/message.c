@@ -12,12 +12,13 @@ void write_loop();
 
 char incoming_message[INCOMING_MAX_LEN];
 char outgoing_message[OUTGOING_MAX_LEN + 3]; // For terminating character and CRLF
-volatile int uart_new_data_available = 0;
+volatile int uart_new_data_available = 0, should_read_joystick = 0, should_play_note = 0;
 message_mode_type message_mode = WRITE;
-uint8_t state;
-volatile int should_read_joystick = 0, is_speaker_on = 0;
+uint8_t state = 0;
 int curr_dash_start_x = 0, curr_dash_end_x = 5, curr_dash_y = 48;
 int curr_char = 0;
+uint32_t notes[] = {340, 227, 180};
+int num_notes = 3, curr_note = 0;
 
 
 /**********************************************************
@@ -25,6 +26,7 @@ int curr_char = 0;
  ***********************************************************/
 
 void enable_write_mode();
+void play_note();
 
 
 /**********************************************************
@@ -33,19 +35,14 @@ void enable_write_mode();
 
 void uart_rxav_isr() {
 	uart_new_data_available = uart_receive_notblocking(incoming_message);
-	if (uart_new_data_available) {
-		timer_interrupt_enable(TIMER1);
-		timer_interrupt_enable(TIMER2);
-	}
 }
 
 void read_joystick_isr() {
 	should_read_joystick = 1;
 }
 
-void turn_speaker_off() {
-	timer_interrupt_disable(TIMER2);
-	speaker_off();
+void play_note_isr() {
+	should_play_note = 1;
 }
 
 
@@ -53,12 +50,18 @@ void turn_speaker_off() {
  * Common helper functions
  ***********************************************************/
 
-void reset_write_mode() {
-	outgoing_message[0] = '\0';
-	curr_char = 0;
-	curr_dash_start_x = 0;
-	curr_dash_end_x = 5;
-	curr_dash_y = 48;
+void play_note() {
+	timer_interrupt_disable(TIMER2);
+
+	if (curr_note == num_notes) {
+		curr_note = 0;
+		speaker_off();
+	} else {
+		timer_attach_interrupt(TIMER2, speaker_toggle, notes[curr_note], 0);
+		curr_note++;
+		timer_interrupt_enable(TIMER2);
+		timer_interrupt_enable(TIMER1);
+	}
 }
 
 
@@ -88,8 +91,8 @@ void view_loop() {
 	if (uart_new_data_available) {
 		uart_new_data_available = 0;
 		display_incoming_message();
+		if (curr_note == 0) play_note();
 	}
-
 
 	// switch to write mode
 	if (state & JOYSTICK_CENTER) {
@@ -151,8 +154,15 @@ void outgoing_message_send() {
 	outgoing_message[len + 2] = '\0';
 	uart_send_notblocking(outgoing_message);
 
-	timer_interrupt_enable(TIMER1);
-	timer_interrupt_enable(TIMER2);
+	if (curr_note == 0) play_note();
+}
+
+void reset_write_mode() {
+	outgoing_message[0] = '\0';
+	curr_char = 0;
+	curr_dash_start_x = 0;
+	curr_dash_end_x = 5;
+	curr_dash_y = 48;
 }
 
 void enable_write_mode() {
@@ -162,7 +172,6 @@ void enable_write_mode() {
 }
 
 void write_loop() {
-
 	if (state & JOYSTICK_CENTER) {
 		if (curr_char == 29) {
 			// Send
@@ -243,16 +252,26 @@ void enable_message_mode() {
 
 	enable_view_mode();
 
-	timer_attach_interrupt(TIMER1, turn_speaker_off, 200, 1);
-	timer_attach_interrupt(TIMER2, speaker_toggle, 1, 0);
+	speaker_init();
+
+	timer_interrupt_setup(TIMER2, 10);
+	timer_attach_interrupt(TIMER1, play_note_isr, 400, 1);
 	timer_interrupt_enable(TIMER3);
 
 	uart_enable();
 	uart_specific_interrupt_cmd(RXAV, ENABLE);
 	uart_interrupt_enable();
+
+	curr_note = should_read_joystick = 0;
 }
 
 void message_loop() {
+	if (should_play_note) {
+		should_play_note = 0;
+
+		play_note();
+	}
+
 	if (!should_read_joystick) {
 		return;
 	}

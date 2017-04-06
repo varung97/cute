@@ -115,7 +115,7 @@ void uart_transmit_vals() {
 	num_transmissions++;
 
 	sprintf(uart_str,
-			"%s%s%03d_-_T%.1f_L%04d_AX%03d_AY%03d_AZ%03d\r\n",
+			"%s%s%03d_-_T%.1f_L%d_AX%d_AY%d_AZ%d\r\n",
 			is_red_rgb_blinking  ? "Fire was Detected.\r\n" : "",
 			is_blue_rgb_blinking ? "Movement in darkness was Detected.\r\n" : "",
 			num_transmissions,

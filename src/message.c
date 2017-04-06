@@ -52,11 +52,13 @@ void play_note_isr() {
 
 void play_note() {
 	timer_interrupt_disable(TIMER2);
+	timer_interrupt_disable(TIMER1);
 
 	if (curr_note == num_notes) {
 		curr_note = 0;
 		speaker_off();
 	} else {
+		timer_interrupt_setup(TIMER2, 10);
 		timer_attach_interrupt(TIMER2, speaker_toggle, notes[curr_note], 0);
 		curr_note++;
 		timer_interrupt_enable(TIMER2);
@@ -255,6 +257,7 @@ void enable_message_mode() {
 	speaker_init();
 
 	timer_interrupt_setup(TIMER2, 10);
+	timer_interrupt_setup(TIMER1, 1000);
 	timer_attach_interrupt(TIMER1, play_note_isr, 400, 1);
 	timer_interrupt_enable(TIMER3);
 

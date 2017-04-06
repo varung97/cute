@@ -6,6 +6,7 @@
  */
 
 #include "speaker_helper.h"
+#include "rgb_helper.h"
 
 volatile uint8_t is_speaker_on;
 

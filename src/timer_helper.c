@@ -6,7 +6,6 @@
  */
 
 #include "timer_helper.h"
-#include "led_helper.h"
 
 volatile uint32_t ms_ticks;
 char str_bleh[18];

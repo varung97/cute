@@ -8,9 +8,11 @@
 #include "monitor.h"
 
 int8_t x, y, z;
+int8_t prev_acc_x = 1, prev_acc_y = -9, prev_acc_z = 40;
 uint8_t led7seg_display_val;
 int num_transmissions = 0;
 volatile int led = 0;
+int flag = 0;
 
 int32_t temp_val;
 uint32_t light_val;
@@ -62,25 +64,33 @@ void conditionally_turn_on_blue_and_red_rgbs() {
 
 void enable_monitor_mode() {
 	reset_board();
+	flag = 1;
 
 	led7seg_display_val = is_blue_rgb_blinking = is_red_rgb_blinking = num_transmissions = 0;
 	pwm_val = 10;
 
 	led7seg_set_number(led7seg_display_val);
 	acc_setMode(ACC_MODE_MEASURE);
-	light_enable();
-	uart_enable();
-	oled_putString(0, 0, (uint8_t *) "MONITOR", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
-	light_clearIrqStatus();
+	lightEnable(LIGHT_LOW_WARNING);
+	uart_enable();
+	oled_putString(0, 0, (uint8_t *) "    MONITOR", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+
 	gpio_interrupt_clear(2, 5);
 	gpio_interrupt_clear(0, 2);
 
+	timer_interrupt_setup(TIMER2, 500);
+	timer_attach_interrupt(TIMER1, do_every_second, 1000, 0);
+	timer_attach_interrupt(TIMER2, pwm, 1, 0);
 	timer_interrupt_enable(TIMER0);
 	timer_interrupt_enable(TIMER1);
 
+	uart_interrupt_enable();
+
 	eint_interrupt_handler_enable(EINT3);
 	temp_reset_times();
+
+	uart_send_notblocking("Entering Monitor Mode\r\n");
 }
 
 void display_values() {
@@ -108,7 +118,7 @@ void uart_transmit_vals() {
 	num_transmissions++;
 
 	sprintf(uart_str,
-			"%s%s%03d_-_T%.1f_L%04d_AX%03d_AY%03d_AZ%03d\r\n",
+			"%s%s%03d_-_T%.1f_L%d_AX%d_AY%d_AZ%d\r\n",
 			is_red_rgb_blinking  ? "Fire was Detected.\r\n" : "",
 			is_blue_rgb_blinking ? "Movement in darkness was Detected.\r\n" : "",
 			num_transmissions,
@@ -181,8 +191,13 @@ void monitor_loop() {
 
 		acc_read(&x, &y, &z);
 
-		did_motion_occur = (abs(x) + abs(y) + abs(z) > ACC_STABLE + ACC_THRESHOLD ||
-		   abs(x) + abs(y) + abs(z) < ACC_STABLE - ACC_THRESHOLD);
+		did_motion_occur = (abs(x - prev_acc_x) >= ACC_THRESHOLD ||
+							abs(y - prev_acc_y) >= ACC_THRESHOLD ||
+							abs(y - prev_acc_y) >= ACC_THRESHOLD) & !flag;
+		prev_acc_x = x;
+		prev_acc_y = y;
+		prev_acc_z = z;
+		flag = 0;
 
 		if (should_read_vals()) {
 
@@ -202,7 +217,7 @@ void monitor_loop() {
 
 	if (should_update_temp) {
 		temp_update_times();
-		if (temp_val > TEMP_HIGH_WARNING) {
+		if (temp_val > (TEMP_HIGH_WARNING * 10)) {
 			is_red_rgb_blinking = 1;
 		}
 		should_update_temp = 0;

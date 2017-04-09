@@ -6,8 +6,9 @@
  */
 
 #include "speaker_helper.h"
+#include "rgb_helper.h"
 
-uint8_t is_speaker_on;
+volatile uint8_t is_speaker_on;
 
 void speaker_init() {
 	pin_set_dir(0, 27, 1);
@@ -24,19 +25,31 @@ void speaker_init() {
 	is_speaker_on = 0;
 }
 
+void speaker_deinit() {
+	speaker_off();
+	pin_set_val(0, 27); //LM4811-clk
+	pin_set_val(0, 28); //LM4811-up/dn
+	pin_set_val(2, 13); //LM4811-shutdn
+
+	pin_set_dir(0, 27, 0);
+	pin_set_dir(0, 28, 0);
+	pin_set_dir(2, 13, 0);
+}
+
 void speaker_toggle() {
 	if (is_speaker_on) {
 		speaker_off();
 	} else {
 		speaker_on();
 	}
-	is_speaker_on = !is_speaker_on;
 }
 
 void speaker_on() {
+	is_speaker_on = 1;
 	pin_set_val(0, 26);
 }
 
 void speaker_off() {
+	is_speaker_on = 0;
 	pin_clear_val(0, 26);
 }

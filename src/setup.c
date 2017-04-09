@@ -16,7 +16,7 @@ void init_interfaces() {
 
 void init_external_peripherals() {
 	acc_init();
-	lightInit(LIGHT_LOW_WARNING);
+	light_init();
 	temp_init(&get_ms_ticks);
 	rgb_init();
 	oled_init();

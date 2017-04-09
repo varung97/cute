@@ -8,6 +8,7 @@
 #include "monitor.h"
 
 int8_t x, y, z;
+int8_t prev_acc_x = 1, prev_acc_y = -9;
 uint8_t led7seg_display_val;
 int num_transmissions = 0;
 volatile int led = 0;
@@ -68,11 +69,11 @@ void enable_monitor_mode() {
 
 	led7seg_set_number(led7seg_display_val);
 	acc_setMode(ACC_MODE_MEASURE);
-	light_enable();
+
+	lightEnable(LIGHT_LOW_WARNING);
 	uart_enable();
 	oled_putString(0, 0, (uint8_t *) "    MONITOR", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
 
-	light_clearIrqStatus();
 	gpio_interrupt_clear(2, 5);
 	gpio_interrupt_clear(0, 2);
 
@@ -164,8 +165,10 @@ void do_every_second() {
 void eint3_isr() {
 	if (did_gpio_interrupt_occur(2, 5)) {
 		// light interrupt
+
 		gpio_interrupt_clear(2, 5);
 		light_clearIrqStatus();
+		leds_only_turn_on(led = !led);
 		if (did_motion_occur) {
 			is_blue_rgb_blinking = 1;
 		}
@@ -188,8 +191,13 @@ void monitor_loop() {
 
 		acc_read(&x, &y, &z);
 
-		did_motion_occur = (abs(x) + abs(y) + abs(z) > ACC_STABLE + ACC_THRESHOLD ||
-		   abs(x) + abs(y) + abs(z) < ACC_STABLE - ACC_THRESHOLD);
+//		did_motion_occur = (abs(x) + abs(y) + abs(z) > ACC_STABLE + ACC_THRESHOLD ||
+//		   abs(x) + abs(y) + abs(z) < ACC_STABLE - ACC_THRESHOLD);
+
+		did_motion_occur = (abs(x - prev_acc_x) >= ACC_THRESHOLD ||
+							abs(y - prev_acc_y) >= ACC_THRESHOLD);
+		prev_acc_x = x;
+		prev_acc_y = y;
 
 		if (should_read_vals()) {
 

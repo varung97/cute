@@ -27,9 +27,9 @@
 
 #define LIGHT_RANGE 973
 #define LIGHT_LOW_WARNING 50
-#define TEMP_HIGH_WARNING 250
+#define TEMP_HIGH_WARNING 450
 #define ACC_STABLE 50
-#define ACC_THRESHOLD 7
+#define ACC_THRESHOLD 5
 
 void enable_monitor_mode();
 void toggle_leds();

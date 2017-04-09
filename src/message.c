@@ -17,7 +17,7 @@ message_mode_type message_mode = WRITE;
 uint8_t state = 0;
 int curr_dash_start_x = 0, curr_dash_end_x = 5, curr_dash_y = 48;
 int curr_char = 0;
-uint32_t notes[] = {340, 227, 180};
+uint32_t notes[] = {170, 114, 85};
 int num_notes = 3, curr_note = 0;
 
 
@@ -258,7 +258,7 @@ void enable_message_mode() {
 
 	timer_interrupt_setup(TIMER2, 10);
 	timer_interrupt_setup(TIMER1, 1000);
-	timer_attach_interrupt(TIMER1, play_note_isr, 400, 1);
+	timer_attach_interrupt(TIMER1, play_note_isr, 150, 1);
 	timer_interrupt_enable(TIMER3);
 
 	uart_enable();

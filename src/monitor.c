@@ -64,12 +64,12 @@ void conditionally_turn_on_blue_and_red_rgbs() {
 
 void enable_monitor_mode() {
 	reset_board();
-	flag = 1;
+	flag = is_new_second = 1;
+	led7seg_display_val = 15;
 
-	led7seg_display_val = is_blue_rgb_blinking = is_red_rgb_blinking = num_transmissions = 0;
+	is_blue_rgb_blinking = is_red_rgb_blinking = num_transmissions = 0;
 	pwm_val = 10;
 
-	led7seg_set_number(led7seg_display_val);
 	acc_setMode(ACC_MODE_MEASURE);
 
 	lightEnable(LIGHT_LOW_WARNING);

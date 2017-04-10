@@ -25,7 +25,7 @@
 #include "rgb_helper.h"
 #include "led7seg_helper.h"
 
-#define LIGHT_RANGE 973
+#define LIGHT_RANGE 3892
 #define LIGHT_LOW_WARNING 50
 #define TEMP_HIGH_WARNING 45
 #define ACC_THRESHOLD 5

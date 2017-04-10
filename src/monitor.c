@@ -199,7 +199,7 @@ void monitor_loop() {
 		prev_acc_z = z;
 		flag = 0;
 
-		if (should_read_vals()) {
+		if (should_read_vals() ) {
 
 			light_val = light_read();
 			pwm_val = (light_val * 20) / LIGHT_RANGE + 1;

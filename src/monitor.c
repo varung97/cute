@@ -29,7 +29,8 @@ volatile int is_new_second = 0,
 			 should_update_temp = 0,
 			 start = 0,
 			 end = 0,
-			 did_motion_occur = 0;
+			 did_motion_occur = 0,
+			 did_light_interrupt_occur = 0;
 
 volatile uint32_t temp_curr_time = 0;
 volatile uint32_t temp_times[334] = {0};
@@ -168,7 +169,7 @@ void eint3_isr() {
 	if (did_gpio_interrupt_occur(2, 5)) {
 		// light interrupt
 		gpio_interrupt_clear(2, 5);
-		light_clearIrqStatus();
+		did_light_interrupt_occur = 1;
 		if (did_motion_occur) {
 			is_blue_rgb_blinking = 1;
 		}
@@ -198,6 +199,11 @@ void monitor_loop() {
 		prev_acc_y = y;
 		prev_acc_z = z;
 		flag = 0;
+
+		if(did_light_interrupt_occur) {
+			light_clearIrqStatus();
+			did_light_interrupt_occur = 0;
+		}
 
 		if (should_read_vals() ) {
 

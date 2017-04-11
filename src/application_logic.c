@@ -33,7 +33,6 @@ void reset_board() {
 	acc_setMode(ACC_MODE_STANDBY);
 	light_shutdown();
 	uart_disable();
-	speaker_off();
 	speaker_deinit();
 	oled_clearScreen(OLED_COLOR_BLACK);
 	uart_should_queue = 0;

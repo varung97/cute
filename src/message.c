@@ -266,6 +266,8 @@ void enable_message_mode() {
 	uart_interrupt_enable();
 
 	curr_note = should_read_joystick = 0;
+
+	uart_send_notblocking("Entering Message Mode\r\n");
 }
 
 void message_loop() {
